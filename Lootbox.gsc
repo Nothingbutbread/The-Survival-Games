@@ -17,9 +17,77 @@ giveSupplyDrop()
 		else if (luck < 90) { teir = 2; }
 		else { teir = 3; }
 	}
-	if (teir == 1) { self thread LB_Common(); }
-	else if(teir == 2) { self thread LB_Uncommon(); }
-	else { self thread LB_Rare(); }
+	if (level.debugger) { self thread LB_DEBUG(); }
+	else
+	{
+		if (teir == 1) { self thread LB_Common(); }
+		else if(teir == 2) { self thread LB_Uncommon(); }
+		else { self thread LB_Rare(); }
+	}
+}
+Generate_Common_Loot()
+{
+	luck = RandomIntRange(0,100);
+	retval = "";
+	if (self.occupation == "Speicalist")
+	{
+		if (luck < 50){ retval = Loot_Common_gun(); } // 50% chance of gun
+		else if (luck < 75) { retval = Loot_Booster(); } // 25% chance of Booster
+		else if (luck < 85) { retval = Loot_Perk(); } // 10% chance of a perk
+		else { retval = Loot_AAT(); } // 15% chance for an AAT
+	}
+	else
+	{
+		if (luck < 60){ retval = Loot_Common_gun(); } // 60% chance of gun
+		else if (luck < 85) { retval = Loot_Booster(); } // 25% chance of Booster
+		else if (luck < 95) { retval = Loot_Perk(); } // 10% chance of a perk
+		else { retval = Loot_AAT(); } // 5% chance for an AAT
+	}
+	return retval;
+}
+Generate_Uncommon_Loot()
+{
+	luck = RandomIntRange(0,100);
+	retval = "";
+	if (self.occupation == "Speicalist")
+	{
+		if (luck < 35) { retval = Loot_Uncommon_gun(); } // 35% chance of a gun
+		else if (luck < 55) { retval = Loot_Booster(); } // 20% chance of a booster
+		else if (luck < 65) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else if (luck < 90) { retval = Loot_AAT(); } // 25% chance of a AAT
+		else { retval = Loot_Ability(); } // 10% chance for an ability
+	}
+	else
+	{
+		if (luck < 35) { retval = Loot_Uncommon_gun(); } // 35% chance of a gun
+		else if (luck < 60) { retval = Loot_Booster(); } // 25% chance of a booster
+		else if (luck < 75) { retval = Loot_Perk(); }  // 15% chance of a perk
+		else if (luck < 90) { retval = Loot_AAT(); } // 15% chance of a AAT
+		else { retval = Loot_Ability(); } // 10% chance for an ability
+	}
+	return retval;
+}
+Generate_Rare_Loot()
+{
+	luck = RandomIntRange(0,100);
+	retval = "";
+	if (self.occupation == "Speicalist")
+	{
+		if (luck < 20) { retval = Loot_Uncommon_gun(); } // 20% chance of a gun
+		else if (luck < 30) { retval = Loot_Booster(); } // 10% chance of a booster
+		else if (luck < 40) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else if (luck < 75) { retval = Loot_AAT(); } // 35% chance of a AAT
+		else { retval = Loot_Ability(); } // 25% chance for an ability
+	}
+	else
+	{
+		if (luck < 25) { retval = Loot_Uncommon_gun(); } // 25% chance of a gun
+		else if (luck < 35) { retval = Loot_Booster(); } // 10% chance of a booster
+		else if (luck < 50) { retval = Loot_Perk(); }  // 15% chance of a perk
+		else if (luck < 75) { retval = Loot_AAT(); } // 25% chance of a AAT
+		else { retval = Loot_Ability(); } // 25% chance for an ability
+	}
+	return retval;
 }
 LB_Common()
 {
@@ -32,41 +100,18 @@ LB_Common()
 		self.loot[items] = Loot_Warrior_First();
 		items++;
 	}
+	if (self.occupation == "Scout" && self.occupation_bonus)
+	{
+		self.occupation_bonus = false;
+		self.loot[items] = Loot_Scout_First();
+		items++;
+	}
 	self.lootboxrarity = "Common";
 	self.lootboxitemcount = items;
 	self.inventory_menu_BG.color = (.2,.2,.2);
 	self.loot_menu_Scroller.color = (1,1,1);
 	self.inventory_menu_HUD.color = (0,.7,0);
 	self thread Menu_Loot_Open();
-}
-Generate_Common_Loot()
-{
-	luck = RandomIntRange(0,100);
-	retval = "";
-	if (luck >= 65){ retval = Loot_Common_gun(); } // 65% chance of gun
-	else if (luck >= 90) { retval = Loot_Booster(); } // 25% chance of Booster
-	else { retval = Loot_Perk(); } // 10% chance of a perk
-	return retval;
-}
-Generate_Uncommon_Loot()
-{
-	luck = RandomIntRange(0,100);
-	retval = "";
-	if (luck >= 60) { retval = Loot_Uncommon_gun(); } // 40% chance of a gun
-	else if (luck >= 30) { retval = Loot_Booster(); } // 30% chance of a booster
-	else if (luck >= 10) { retval = Loot_Perk(); }  // 20% chance of a perk
-	else { retval = Loot_Ability(); } // 10% chance for an ability
-	return retval;
-}
-Generate_Rare_Loot()
-{
-	luck = RandomIntRange(0,100);
-	retval = "";
-	if (luck >= 70) { retval = Loot_Uncommon_gun(); } // 30% chance of a gun
-	else if (luck >= 50) { retval = Loot_Booster(); } // 20% chance of a booster
-	else if (luck >= 25) { retval = Loot_Perk(); }  // 25% chance of a perk
-	else { retval = Loot_Ability(); } // 25% chance for an ability
-	return retval;
 }
 LB_Uncommon()
 {
@@ -77,6 +122,12 @@ LB_Uncommon()
 	{
 		self.occupation_bonus = false;
 		self.loot[items] = Loot_Warrior_First();
+		items++;
+	}
+	if (self.occupation == "Scout" && self.occupation_bonus)
+	{
+		self.occupation_bonus = false;
+		self.loot[items] = Loot_Scout_First();
 		items++;
 	}
 	self.lootboxrarity = "Uncommon";
@@ -95,6 +146,12 @@ LB_Rare()
 	{
 		self.occupation_bonus = false;
 		self.loot[items] = Loot_Warrior_First();
+		items++;
+	}
+	if (self.occupation == "Scout" && self.occupation_bonus && items < 6)
+	{
+		self.occupation_bonus = false;
+		self.loot[items] = Loot_Scout_First();
 		items++;
 	}
 	self.lootboxrarity = "Rare";
@@ -193,20 +250,55 @@ LootBox_Spawner()
 	level endon("game_ended");
 	if (level.lc.size < 8) { return; } // 8 points must be defined to work.
 	index = -1;
+	fakeindex = 0;
 	while(true)
 	{
 		if (level.activelootboxes < 8)
 		{
 			index++;
 			if (index >= 8) { index = 0; }
-			location = RandomIntRange(0, level.lc.size); // Is atleast 8.
-			level thread Spawn_LootCrate(index, location);
+			if (isTheTrapQueueEmpty(fakeindex))
+			{
+				location = RandomIntRange(0, level.lc.size); // Is atleast 8.
+				level thread Spawn_LootCrate(index, location);
+			}
+			else
+			{
+				level thread AAT_Spawn_FakeLootCrate(index, level.trapsqueue[fakeindex], level.trapsqueueplayers[fakeindex]);
+				fakeindex++;
+			}
 			wait .5;
 		}
 		else { wait 8; }
 	}
 }
-
-
-
-
+isTheTrapQueueEmpty(i)
+{
+	if (!isDefined(level.trapsqueue[i])) { return true; }
+	return false;
+}
+LB_DEBUG()
+{
+	items = 6;
+	for(x=0;x<items;x++) { self.loot[x] = self thread Generate_DEBUG_Loot(); }
+	self.lootboxrarity = "Debugger";
+	self.lootboxitemcount = items;
+	self.inventory_menu_BG.color = (0,0,1);
+	self.loot_menu_Scroller.color = (1,0,0);
+	self.inventory_menu_HUD.color = (0,1,0);
+	self thread Menu_Loot_Open();
+}
+Generate_DEBUG_Loot()
+{
+	luck = RandomIntRange(0,100);
+	retval = "";
+	/*
+	if (luck < 25) { retval = Loot_Uncommon_gun(); } // 25% chance of a gun
+	else if (luck < 35) { retval = Loot_Booster(); } // 10% chance of a booster
+	else if (luck < 50) { retval = Loot_Perk(); }  // 15% chance of a perk
+	else if (luck < 75) { retval = Loot_AAT(); } // 25% chance of a AAT
+	else { retval = Loot_Ability(); } // 25% chance for an ability
+	*/
+	retval = Loot_AAT();
+	return retval;
+}

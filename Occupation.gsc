@@ -4,9 +4,10 @@ init_Occupation(in)
 	{
 		self.occupation = "Addict";
 		self.invlimmit[1] = 6;
+		self.invlimmit[2] = 6;
 		self thread Occupation_Addict_Streaker();
 		self iprintln("You selected the Addict Class!");
-		self iprintln("^2Your boosters have been buffed and kills give you extra health and speed!");
+		self iprintln("^2Your boosters and abiltiies have been buffed and kills give you extra health and speed!");
 	}
 	else if (in == 1) 
 	{ 
@@ -31,6 +32,7 @@ init_Occupation(in)
 		self.invlimmit[0] = 6; 
 		self.invlimmit[1] = 6; 
 		self.invlimmit[2] = 6;
+		self.invlimmit[3] = 6;
 		self.basehealth = 150;
 		self.maxhealth = self.basehealth;
 		self.health = self.basehealth;
@@ -45,15 +47,15 @@ init_Occupation(in)
 		self Perk_Scrounger();
 		self Perk_Staminia_up();
 		self thread Occupation_Scout_Streaker();
-		self iprintln("You selected the Scout Class! ^1This class is not complete yet!");
-		self iprintln("^2You have stealth perks and speed perks. Birds Eye view lasts twice as long.\n3 kills and on autogive a Birds eye view booster effect.");
+		self iprintln("You selected the Scout Class!");
+		self iprintln("^2Your first lootbox will have a sniper. Birds Eye view lasts twice as long.\n3 kills and on autogive a Birds eye view booster effect.");
 	}
 	else if (in == 5)
 	{ 
 		self.occupation = "Athlete";
-		self setmovespeedscale(1.25);
-		self.basespeed = 1.25;
-		self.curspeed = 1.25;
+		self setmovespeedscale(1.2);
+		self.basespeed = 1.2;
+		self.curspeed = 1.2;
 		self Perk_Staminia_up();
 		self thread Occupation_Athlete_Streaker();
 		self iprintln("You selected the Athlete Class!");
@@ -62,14 +64,11 @@ init_Occupation(in)
 	}
 	else if (in == 6)
 	{ 
-		self.occupation = "Pirate";
-		self.invlimmit[0] = 6; 
-		self.invlimmit[1] = 6; 
-		self.invlimmit[2] = 6;
-		self iprintln("You selected the Pirate Class! ^1This class is undergoing major revision!");
-		self iprintln("^2You have max inventory space and loot box odds ... for now.");
-		//self thread Occupation_Pirate_Streaker();
-		self thread Occupation_Brookie_Streaker();
+		self.occupation = "Speicalist";
+		self.invlimmit[3] = 6;
+		self thread Occupation_Speicalist_Streaker();
+		self iprintln("You selected the Speicalist Class!");
+		self iprintln("^2Double ammo for AAT's and better odds to obtain them with max storage of AAT's");
 	}
 }
 Occupation_Addict_Streaker()
@@ -106,6 +105,14 @@ Occupation_Brookie_Streaker()
 			{
 				self.occupation_bonus = true;
 				self iprintlnbold("2 killstreak bonus: ^2The next loot crate you open will be Rare!");
+			}
+			if (streak == 4)
+			{
+				self iprintlnbold("4 killstreak bonus: ^2Max Inventory Space!");
+				self.invlimmit[0] = 6; 
+				self.invlimmit[1] = 6; 
+				self.invlimmit[2] = 6;
+				self.invlimmit[3] = 6;
 				break;
 			}
 		}
@@ -128,12 +135,15 @@ Occupation_Warrior_Streaker()
 			{
 				self iprintlnbold("3 killstreak bonus: ^2All perks obtained!");
 				self ClearPerks();
+				self notify("perk_stop_sixithsense");
 				self Reset_Perks();
 				self Perk_Speedcola();
 				self Perk_Doubletap();
 				self Perk_Staminia_up();
 				self Perk_Scrounger();
 				self Perk_Resistance();
+				self Perk_Mulekick();
+				self thread Perk_sixithsense();
 				self.basespeed += .2;
 				if (self.curspeed < self.basespeed) { self setmovespeedscale(self.basespeed); }
 				break;
@@ -192,8 +202,8 @@ Occupation_Athlete_Streaker()
 			streak++;
 			if (streak == 3)
 			{
-				self iprintlnbold("3 killstreak bonus: ^2Base movement speed increased 50%!");
-				self.basespeed += .5;
+				self iprintlnbold("3 killstreak bonus: ^2Base movement speed increased 35 percent!");
+				self.basespeed += .35;
 				if (self.curspeed < self.basespeed) { self setmovespeedscale(self.basespeed); }
 				break;
 			}
@@ -201,29 +211,29 @@ Occupation_Athlete_Streaker()
 		wait .05;
 	}
 }
-/*
-Occupation_Pirate_Streaker()
+Occupation_Speicalist_Streaker()
 {
 	self endon("death");
 	self endon("disconnect");
+	streak = 0;
 	i = self.pers["kills"];
 	while(true)
 	{
 		if (self.pers["kills"] != i)
 		{
 			i = self.pers["kills"];
-			for(y=1;y<4;y++)
+			streak++;
+			if (streak == 3)
 			{
-				for(x=0;x<6;x++)
-				{
-					if (level.lastkilled.inventory[y][x] != "")
-					{
-						self add_Thing_To_Inventory(y, level.lastkilled.inventory[y][x], false);
-					}
-				}
+				self iprintlnbold("3 killstreak bonus: ^2Base movement and health increased!");
+				self.basespeed += .2;
+				if (self.curspeed < self.basespeed) { self setmovespeedscale(self.basespeed); }
+				self.basehealth += 25;
+				if (self.basehealth > 200) { self.basehealth = 200; }
+				if (self.maxhealth < self.basehealth) { self.maxhealth = self.basehealth; }
+				break;
 			}
 		}
 		wait .05;
 	}
 }
-*/

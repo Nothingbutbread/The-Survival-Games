@@ -8,11 +8,13 @@ init()
 	PrecacheItem("minigun_wager_mp");
 	PrecacheItem("m32_wager_mp");
 	Precacheshader("perk_hardline");
+	Precacheshader("perk_awareness");
+	PrecacheModel("projectile_sidewinder_missile");
 	PrecacheModel("mp_flag_neutral");
 	PrecacheModel("t6_wpn_supply_drop_trap");
 	PrecacheModel("collision_clip_wall_128x128x10");
-	PrecacheModel("collision_clip_wall_512x512x10");
 	PrecacheModel("collision_clip_wall_256x256x10");
+	PrecacheModel("collision_clip_wall_512x512x10");
 	level.strings = [];
 	level.lc = []; // Loot crate possible locations, Storeage of vectors.
 	level.overflowfixthreaded = false;
@@ -20,6 +22,8 @@ init()
 	level.startalive = true;
 	level.peacetime = false;
 	level.belowmapdeathbarrier = -3000;
+	level.activetraps = 0;
+	level.targtedplayers = 0;
 	level.activelootboxes = 0;
 	level.mmiconsspawned = 0;
 	level.debugger = false;
@@ -49,18 +53,25 @@ onPlayerSpawned()
 	self.occupation = "";
 	self.occupation_bonus = false;
 	self.canteleport = true;
+	self.cantaunt = true;
+	self.istargted = false;
 	self.curspeed = 1;
 	self.basespeed = 1;
 	self.basehealth = 100;
+	self.resistanceabilityactive = false;
+	self.canusemenu = true;
 	self.savedfromthedepths = true;
 	self.lootboxrarity = "Common";
 	self.lootboxitemcount = 0;
+	self.spawnorigin = (0,0,0);
 	self thread init_HUDS();
+	self thread onPlayerDisconnect();
 	if (self isHost()) { self thread AntiEndgame(); level.dahost = self; }
     while(true)
     {
     	self notify("menuresponse", "changeclass", "class_smg");
         self waittill("spawned_player");
+        self.spawnorigin = self.origin;
         self SetClientUIVisibilityFlag("g_compassShowEnemies", 0);
         if (level.debugger) { self thread getOrigin(); }
         self StartingLoadout();
@@ -68,13 +79,16 @@ onPlayerSpawned()
         self.iscoolfordisgame = level.startalive;
         self.inventory_menu_open = false;
         self.loot_menu_open = false;
+        self.canusemenu = true;
+        self.resistanceabilityactive = false;
         self thread Menu_Inventory_Open_Bind(); // If the player is not in, the bind will not run.
         self.inventory_menu_HUD.alpha = 0;
 		self.inventory_menu_BG.alpha = 0;
 		self.inventory_menu_Scroller.alpha = 0;
 		self.loot_menu_Scroller.alpha = 0;
 		self EnableInvulnerability();
-        if (self.iscoolfordisgame) // Player is not in the game
+		self thread onPlayerDeath();
+        if (self.iscoolfordisgame) // Player is in the game
         {
         	self thread WatchForFallOutOfMap();
         }
@@ -84,28 +98,28 @@ onPlayerSpawned()
 DefineWeapondataarray()
 {
 	level.AttachmentArray = [];
-	level.AttachmentArray[0] = "silencer"; //Suppressor
-	level.AttachmentArray[1] = "dualoptic"; //Hybrid Optic
-	level.AttachmentArray[2] = "extbarrel"; //Long Barrel
-	level.AttachmentArray[3] = "fastads"; //Quickdraw
-	level.AttachmentArray[4] = "grip"; //Fore Grip
-	level.AttachmentArray[5] = "holo"; //EOTech
-	level.AttachmentArray[6] = "mms"; //MMS
-	level.AttachmentArray[7] = "rangefinder"; //Target Finder
-	level.AttachmentArray[8] = "reflex"; //Reflex Sight
-	level.AttachmentArray[9] = "rf"; //Rapid Fire
-	level.AttachmentArray[10] = "stackfire"; //Tri-Bolt
-	level.AttachmentArray[11] = "stalker"; //Stock
-	level.AttachmentArray[12] = "tacknife"; //Tactical Knife
-	level.AttachmentArray[13] = "extclip"; //Extended Clip
-	level.AttachmentArray[14] = "fmj"; //FMJ
-	level.AttachmentArray[15] = "steadyaim"; //Laser
-	level.AttachmentArray[16] = "vzoom"; //Variable Zoom
-	level.AttachmentArray[17] = "acog"; //ACOG
-	level.AttachmentArray[18] = "dualclip"; //Fast Mag
-	level.AttachmentArray[19] = "ir"; //Dual Band
-	level.AttachmentArray[20] = "is"; //?
-	level.AttachmentArray[21] = "swayreduc"; //Ballistics CPU
+	level.AttachmentArray[0] = "dualoptic"; //Hybrid Optic
+	level.AttachmentArray[1] = "extbarrel"; //Long Barrel
+	level.AttachmentArray[2] = "fastads"; //Quickdraw
+	level.AttachmentArray[3] = "grip"; //Fore Grip
+	level.AttachmentArray[4] = "holo"; //EOTech
+	level.AttachmentArray[5] = "mms"; //MMS
+	level.AttachmentArray[6] = "rangefinder"; //Target Finder
+	level.AttachmentArray[7] = "reflex"; //Reflex Sight
+	level.AttachmentArray[8] = "rf"; //Rapid Fire
+	level.AttachmentArray[9] = "tacknife"; //Tactical Knife
+	level.AttachmentArray[10] = "stalker"; //Stock
+	level.AttachmentArray[11] = "silencer"; //Suppressor
+	level.AttachmentArray[12] = "extclip"; //Extended Clip
+	level.AttachmentArray[13] = "fmj"; //FMJ
+	level.AttachmentArray[14] = "steadyaim"; //Laser
+	level.AttachmentArray[15] = "acog"; //ACOG
+	level.AttachmentArray[16] = "dualclip"; //Fast Mag
+	level.AttachmentArray[17] = "vzoom"; //Variable Zoom
+	level.AttachmentArray[18] = "ir"; //Dual Band
+	level.AttachmentArray[19] = "is"; //?
+	level.AttachmentArray[20] = "swayreduc"; //Ballistics CPU
+	level.AttachmentArray[21] = "stackfire"; //Tri-Bolt
 	//level.AttachmentArray[11] = "sf"; //Select Fire
 	//level.AttachmentArray[4] = "gl"; //Grenade Launcher
 	level.WeaponArray2 = [];
@@ -134,7 +148,6 @@ DefineWeapondataarray()
 	level.WeaponArray[2] = "crossbow_mp";
 	level.WeaponArray[3] = "knife_ballistic_mp";
 	level.WeaponArray[4] = "riotshield_mp";
-	
 	
 	level.WeaponArray[5] = "fiveseven_dw_mp";
 	level.WeaponArray[6] = "fnp45_dw_mp";
@@ -194,6 +207,11 @@ onPlayerDeath()
 	if (self.inventory_menu_open) { self thread Menu_Inventory_Close(); }
 	else if (self.loot_menu_open) { self thread Menu_Loot_Close(); }
 }
+onPlayerDisconnect()
+{
+	self waittill("disconnect");
+	if (self.istargted) { level.targtedplayers--; }
+}
 WatchForFallOutOfMap()
 {
 	self endon("death");
@@ -204,17 +222,20 @@ WatchForFallOutOfMap()
 		{
 			if (self.savedfromthedepths)
 			{ 
-				self iprintln("^3You just fell off the map, you were saved this time but not the nextime!");
+				self iprintln("^3You just fell off the map, you were saved this time but not the next time!");
 				self iprintln("You lost everything in your inventory!");
 				if (self.inventory_menu_open) { self thread Menu_Inventory_Close(); }
 				else if (self.loot_menu_open) { self thread Menu_Loot_Close(); }
 				self.invgun = [];
 				self.invboo = [];
 				self.invabi = [];
+				self.invaat = [];
 				for(x=0;x<6;x++){ self.invgun[x] = ""; }
 				for(x=0;x<6;x++){ self.invboo[x] = ""; }
 				for(x=0;x<6;x++){ self.invabi[x] = ""; }
-				n = RandomIntRange(0,8);
+				for(x=0;x<6;x++){ self.invaat[x] = ""; }
+				n = 0;
+				while(true) { n = RandomIntRange(0,8); if (level.lca[n] >= 0) { break; } wait .05; }
 				self setorigin( level.lc[ level.lca[n] ] + (0,0,20) );
 				wait .5;
 				self.savedfromthedepths = false;
@@ -227,6 +248,8 @@ WatchForFallOutOfMap()
 init_SurvivalGames()
 {
 	level endon("game_ended");
+	level.trapsqueue = []; 
+	level.trapsqueueplayers = [];
 	level.lca = []; // Active locations, Storage of indexes in the lc array.
 	level.startalive = true; // While true new joiners can play in the round. Once the game starts and peacetime ends, this will become false.
 	level.peacetime = false; // While true, everyone has godmode and can collect loot boxes.
@@ -236,9 +259,9 @@ init_SurvivalGames()
 	level waittill("prematch_over");
 	if (!level.debugger)
 	{
-		for(p=0;p<15;p++)
+		for(p=0;p<10;p++)
 		{
-			iprintln("^6Game starting in ^3" + (15 - p));
+			iprintln("^6Game starting in ^3" + (10 - p));
 			wait 1;
 		}
 	}
@@ -333,29 +356,4 @@ init_SurvivalGames()
 		}
 	}
 	level thread maps/mp/gametypes/_globallogic::endgame("tie", "^2" + target.name + " has won the game!");
-}
-
-DEBUG_Test()
-{
-	self endon("nodupetap");
-	passed = 0;
-	for(z=0;z<100;z++)
-	{
-		sucess = true;
-		test = self RandIntArrayNoDupe(15, 0, 18);
-		foundnums = [];
-		foundnums[0] = test[0];
-		for(x=1;x<15;x++)
-		{
-			for(y=0;y<foundnums.size;y++)
-			{
-				if (test[x] == foundnums[y]) { sucess = false; }
-			}
-			foundnums[x] = test[x];
-		}
-		if (sucess) { passed++; }
-		wait .2;
-	}
-	if (passed == 100) { self iprintln("^2All 100 tests passed!"); }
-	else { self iprintln(passed + " tests passed / 100"); }
 }

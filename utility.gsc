@@ -52,8 +52,10 @@ GiveGun(weapon, camo)
 CheckForLostGun()
 {
 	count = 0;
+	target = 3;
+	if (self.zperks[5]) { target = 4; }
 	foreach (gun in self GetWeaponsList())  { count++; }
-	if (count >= 3) { return false; } // The player should always have 3 weapons. Otherwise he is missing one.
+	if (target >= 3) { return false; } // The player should always have 3 weapons. Otherwise he is missing one.
 	return true;
 }
 isanotWeapon(gun)
@@ -78,6 +80,7 @@ add_Thing_To_Inventory(id, item, replace, index)
 	if (id == 1) { array = self.invgun; }
 	else if (id == 2) { array = self.invboo; }
 	else if (id == 3) { array = self.invabi; }
+	else if (id == 4) { array = self.invaat; }
 	else { self iprintln("^1Game Error: ^3Function: add_Thing_To_Inventory ^1got an invalid id!\n^6Report this to the dev!"); array = self.invgun; }
 	for(x=0;x<max;x++) 
 	{ 
@@ -100,6 +103,7 @@ add_Thing_To_Inventory(id, item, replace, index)
 	if (id == 1) { self.invgun = array; }
 	else if (id == 2) { self.invboo = array; }
 	else if (id == 3) { self.invabi = array; }
+	else if (id == 4) { self.invaat = array; }
 }
 setcamo(camo, g)
 {
@@ -115,6 +119,7 @@ setcamo(camo, g)
 // The returned value is used to index into the inventory.
 whatisthatobject(str)
 {
+	// 1 = Weapon, 2 = Booster, 3 = Ability, 4 = AAT, 9 == Perk,
 	if ("Hearty" == str) { return 2; } // Booster
 	else if ("Speedo" == str) { return 2; } 
 	else if ("Quick Heal" == str) { return 2; } 
@@ -124,16 +129,30 @@ whatisthatobject(str)
 	else if ("New Camo" == str) { return 2; } 
 	else if ("Birds Eye View" == str) { return 2; } 
 	else if ("Loot Box Hack" == str) { return 2; }
+	else if ("Inv Upgrade" == str) { return 2; }
+	else if ("Stat Upgrade" == str) { return 2; }
 	else if ("Double Tap II" == str) { return 3; } 
 	else if ("Unlimmited Ammo" == str) { return 3; } 
 	else if ("Electric Cherry" == str) { return 3; } 
 	else if ("Dynamic Camo" == str) { return 3; } 
 	else if ("Gun Game" == str) { return 3; }
+	else if ("Explosive Decoy" == str) { return 4; }
+	else if ("Explosive Trap" == str) { return 4; }
+	else if ("Rocket Launcher" == str) { return 4; }
+	else if ("Slug Ray" == str) { return 4; }
+	else if ("Shell Shock" == str) { return 4; }
+	else if ("Proxy Attack" == str) { return 4; }
+	else if ("Recon Palse" == str) { return 4; }
+	else if ("EMP" == str) { return 4; }
+	else if ("Drained" == str) { return 4; }
+	else if ("Explosive Bullets" == str) { return 4; }
 	else if ("Speed Cola" == str) { return 9; } 
 	else if ("Double Tap" == str) { return 9; } 
 	else if ("Stamina Up" == str) { return 9; } 
 	else if ("Scrounger" == str) { return 9; } 
 	else if ("Resistance" == str) { return 9; } 
+	else if ("Mule Kick" == str) { return 9; }
+	else if ("Sixth Sense" == str) { return 9; }
 	else { return 1; } // A weapon
 }
 // Takes a size value and two intergers for the range.
@@ -211,4 +230,73 @@ SpawnIcon(origin, icon, onEntity)
 	level.mmiconsspawned++;
 }
 
-
+printInventoryType(id)
+{
+	if (id == 0) { self iprintln("Weapon storage increased!"); }
+	else if (id == 1) { self iprintln("Booster storage increased!"); }
+	else if (id == 2) { self iprintln("Ability storage increased!"); }
+	else if (id == 3) { self iprintln("AAT storage increased!"); }
+}
+TraceShot()
+{
+	return bulletTrace(self getEye(), self getEye()+vectorScale(anglesToForward(self getPlayerAngles()), 1000000), false, self)["position"];
+}
+ModTraceShot(degree)
+{
+	angle = self getPlayerAngles();
+	adjustx = RandomIntRange(degree * -1, degree);
+	adjusty = RandomIntRange(degree * -1, degree);
+	temp = angle[0] + adjustx;
+	if (temp < 0)
+	{
+		temp = NoN(temp);
+		temp = 360 - temp;
+	}
+	else if (temp >= 360)
+		temp -= 360;
+	adjustx = temp;
+	temp = angle[1] + adjusty;
+	if (temp < 0)
+	{
+		temp = NoN(temp);
+		temp = 360 - temp;
+	}
+	else if (temp >= 360)
+		temp -= 360;
+	adjusty = temp;
+	angle = (adjustx, adjusty, angle[2]);
+	return bulletTrace(self getEye(), self getEye()+vectorScale(anglesToForward(angle), 1000000), false, self)["position"];
+}
+NoN(num)
+{
+	if (num >= 0)
+		return num;
+	return num * -1;
+}
+GetExpandableInventoryIndex(y)
+{
+	if (self.invlimmit[y] < 6) { return y; }
+	else
+	{
+		count = 0;
+		while(self.invlimmit[y] < 6 && count < 5)
+		{
+			y++;
+			if (y > 3) { y = 0; }
+			if (self.invlimmit[y] < 6) { return y; }
+			count++;
+		}
+		return y;
+	}
+}
+UnstuckPlayer()
+{
+	if (self.savedfromthedepths)
+	{
+		self.savedfromthedepths = false;
+		self setorigin(self.spawnorigin);
+		self iprintln("^1This the only time you can use unstuck this game!");
+		self iprintln("^1Next time will result in death");
+	}
+	else { self suicide(); }
+}

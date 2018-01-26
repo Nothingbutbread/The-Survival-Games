@@ -10,6 +10,10 @@ Give_Cool_Perk(str)
 		self Perk_Scrounger();
 	else if (str == "Resistance")
 		self Perk_Resistance();
+	else if (str == "Mule Kick")
+		self Perk_Mulekick();
+	else if (str == "Sixth Sense")
+		self thread Perk_sixithsense();
 }
 Use_Ability(str)
 {
@@ -31,6 +35,22 @@ Use_Booster(str)
 	else if (str == "New Camo") { self thread Booster_NewCamo(); }
 	else if (str == "Birds Eye View") { self notify("booster_bev"); self thread Booster_BirdsEyeView(); }
 	else if (str == "Loot Box Hack") { self thread Booster_TeleportToLootBox(); }
+	else if (str == "Stat Upgrade") { self thread Booster_IncreasedBaseStats(); }
+	else if (str == "Inv Upgrade") { self thread Booster_IncreasedInventorySpace(); }
+}
+Use_AAT(str)
+{
+	self notify("new_AAT");
+	if (str == "Explosive Decoy") { self thread AAT_FakeLootBox(); }
+	else if (str == "Explosive Trap") { self thread AAT_LayExplosiveTrap(); }
+	else if (str == "Rocket Launcher") { self thread AAT_RocketLauncher(); }
+	else if (str == "Slug Ray") { self thread AAT_SlugRay(); }
+	else if (str == "Shell Shock") { self thread AAT_ShellShock(); }
+	else if (str == "Proxy Attack") { self thread AAT_ProxyAttack(); }
+	else if (str == "Recon Palse") { self thread AAT_ReconPaluse(); }
+	else if (str == "EMP") { }
+	else if (str == "Drained") { }
+	else if (str == "Explosive Bullets") { self thread AAT_ExplosiveBullets(); }
 }
 Booster_Speedo()
 {
@@ -73,11 +93,13 @@ Booster_Vanish()
 	self iprintlnbold("^5The Vanish Booster is now ^2Active!");
 	self iprintln("Your weapons are disabled while the effect is active");
 	self disableWeapons();
+	self hide();
 	if (self.occupation == "Addict") { wait 17; }
 	else { wait 12; }
 	self iprintlnbold("^3The Vanish Booster effect will expire in 3 seconds!");
 	wait 3;
 	self enableWeapons();
+	self show();
 	self iprintlnbold("^5The Vanish Booster effect ^1Expired!");
 }
 Booster_Restock()
@@ -132,9 +154,57 @@ Booster_BirdsEyeView()
 }
 Booster_TeleportToLootBox()
 {
-	n = RandomIntRange(0,8);
+	self endon("death");
+	self endon("disconnect");
+	n = 0;
+	while(true) { n = RandomIntRange(0,8); if (level.lca[n] >= 0) { break; } wait .05; }
 	self setorigin( level.lc[ level.lca[n] ] + (0,0,20) );
 	self iprintln("^1Teleported to a random loot box!");
+}
+Booster_IncreasedBaseStats()
+{
+	inc = RandomIntRange(2,9); // 2 - 8 
+	incs = inc / 100;
+	if (self.basespeed < 2.5) { self.basespeed += incs; } 
+	if (self.curspeed < self.basespeed) { self setmovespeedscale(self.basespeed); }
+	self.basehealth += inc;
+	self.maxhealth = self.basehealth;
+	if (self.basehealth > 200) { self.basehealth = 200; self.maxhealth = 200; self.health = 200; }
+	self.health = self.maxhealth;
+	self iprintln("^2Max Health increased by: ^5" + inc + " ^2Speed increased by: ^5" + incs);
+}
+Booster_IncreasedInventorySpace()
+{
+	n = 0;
+	for(x=0;x<4;x++) { if (self.invlimmit[x] < 6) { n[n.size] = x; } }
+	if (n.size == 0) { self iprintln("Your inventory space was already at max.\nThe hearty booster effect was trigerd instead");  self notify("booster_hearty"); self thread Booster_Hearty(); }
+	else
+	{
+		r = RandomIntRange(0,n.size);
+		if (n.size == 4)
+		{
+			self.invlimmit[r]++;
+			self printInventoryType(r);
+		}
+		else
+		{
+			if (self.invlimmit[r] < 6) 
+			{ 
+				self.invlimmit[r]++;
+				self printInventoryType(r);
+			}
+			else
+			{
+				i = self GetExpandableInventoryIndex(r);
+				if (i < 6) 
+				{
+					self.invlimmit[i]++;
+					self printInventoryType(i); 
+				}
+				else { self iprintln("Your inventory space was already at max.\nThe hearty booster effect was trigerd instead");  self notify("booster_hearty"); self thread Booster_Hearty(); }
+			}
+		}
+	}
 }
 Ability_DoubleTap2()
 {
@@ -215,6 +285,8 @@ Ability_ElectricCherry()
 	}
 }
 ////////////////////////////////////////////
+//     Loot generateing functions         //
+////////////////////////////////////////////
 Loot_Ability()
 {
 	per = RandomIntRange(0, 5);
@@ -226,7 +298,7 @@ Loot_Ability()
 }
 Loot_Booster()
 {
-	per = RandomIntRange(0, 9);
+	per = RandomIntRange(0, 11);
 	if (per == 0) { return "Hearty"; }
 	else if (per == 1) { return "Speedo"; }
 	else if (per == 2) { return "Quick Heal"; }
@@ -236,40 +308,58 @@ Loot_Booster()
 	else if (per == 6) { return "New Camo"; }
 	else if (per == 7) { return "Birds Eye View"; }
 	else if (per == 8) { return "Loot Box Hack"; }
+	else if (per == 9) { return "Stat Upgrade"; }
+	else if (per == 10) { return "Inv Upgrade";}
 }
 Loot_Perk()
 {
-	per = RandomIntRange(0, 5);
-	if (per == 0)
-		return "Speed Cola";
-	else if (per == 1)
-		return "Double Tap";
-	else if (per == 2)
-		return "Stamina Up";
-	else if (per == 3)
-		return "Scrounger";
-	else if (per == 4)
-		return "Resistance";
+	per = RandomIntRange(0, 7);
+	if (per == 0) { return "Speed Cola"; }
+	else if (per == 1) { return "Double Tap"; }
+	else if (per == 2) { return "Stamina Up"; }
+	else if (per == 3) { return "Scrounger"; }
+	else if (per == 4) { return "Resistance"; }
+	else if (per == 5) { return "Mule Kick"; }
+	else if (per == 6) { return "Sixth Sense"; }
 }
+Loot_AAT()
+{
+	per = RandomIntRange(0, 8);
+	if (per == 0) { return "Explosive Decoy"; }
+	else if (per == 1) { return "Explosive Trap"; }
+	else if (per == 2) { return "Rocket Launcher"; }
+	else if (per == 3) { return "Explosive Bullets"; }
+	else if (per == 4) { return "Slug Ray"; }
+	else if (per == 5) { return "Shell Shock"; }
+	else if (per == 6) { return "Proxy Attack"; }
+	else if (per == 7) { return "Recon Palse"; }
+	else if (per == 8) { return "EMP"; }
+	else if (per == 9) { return "Drained"; }
+}
+// Guns in this catogory are intended for Common Loot boxes
+// These guns include lowlevel launchers, pistols and shotguns.
 Loot_Common_gun()
 {
-	att = RandIntArrayNoDupe(2, 0, 19);
+	att = RandIntArrayNoDupe(3, 0, 17);
 	gun = RandomIntRange(0,19);
-	if (gun >= 9) { str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]]; }
-	else { str = level.WeaponArray[gun]; }
-	return str;
-}
-Loot_Uncommon_gun()
-{
-	att = RandIntArrayNoDupe(3, 0, 22);
-	gun = RandomIntRange(0, 43);
 	if (gun >= 9) { str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]]; }
 	else { str = level.WeaponArray[gun]; }
 	return str;
 }
+// Guns in this catorgory are intended for Uncommon Loot boxes
+// These guns include all but nondual weild postols and launchers.
+Loot_Uncommon_gun()
+{
+	att = RandIntArrayNoDupe(3, 0, 21);
+	gun = RandomIntRange(10, 43);
+	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
+	return str;
+}
+// Guns in this catorgry are inteded for rare loot boxes
+// These guns include automatic and semiautomatic riffles and war/death machines
 Loot_Rare_gun()
 {
-	att = RandIntArrayNoDupe(3, 0, 22);
+	att = RandIntArrayNoDupe(3, 0, 21);
 	gun = RandomIntRange(19,45);
 	if (gun < 43) { str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]]; }
 	else { str = level.WeaponArray[gun]; }
@@ -282,6 +372,10 @@ Loot_Warrior_First()
 	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
 	return str;
 }
-
-
-
+Loot_Scout_First()
+{
+	att = RandIntArrayNoDupe(3, 10, 21);
+	gun = RandomIntRange(19,39);
+	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
+	return str;
+}

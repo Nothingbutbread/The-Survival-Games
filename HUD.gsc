@@ -1,22 +1,24 @@
 init_HUDS()
 {
 	// Inventory Menu
-	self.inventory_display_string = "Inventory Menu\nWeapons\nBoosters\nAbilities\n>--------<\n>--------<\n>--------<\nExit Menu";
+	self.inventory_display_string = "Inventory Menu\nWeapons\nBoosters\nAbilities\nAAT's\nTaunt\nUnstuck\nExit Menu";
 	self.inventory_menu_open = false;
 	self.inventory_menu_pos = 0;
 	self.inventory_menu_menu = -1;
-	self.inventory_menu_HUD = self CreateText("Inventory Menu\nWeapons\nBoosters\nAbilities\n>--------<\n>--------<\n>--------<\nExit Menu", 2, 100, 0, (0,.7,0), 0, 10, true, false, true, true);
+	self.inventory_menu_HUD = self CreateText("Inventory Menu\nWeapons\nBoosters\nAbilities\nAAT's\nTaunt\nUnstuck\nExit Menu", 2, 100, 0, (0,.7,0), 0, 10, true, false, true, true);
 	self.inventory_menu_BG = self SpawnShader("white", -190, 0, 150, 250, (0,0,0), 0, 5);
 	self.inventory_menu_Scroller = self SpawnShader("white", -190, 25, 150, 25, (1,1,1), 0, 5);
 	
 	self.invlimmit = []; // First index is max on each type of good that can be held.
-	self.invlimmit[0] = 2; self.invlimmit[1] = 3; self.invlimmit[2] = 2; // Default player can hold 2 guns, 3 boosters, 2 abilities
+	self.invlimmit[0] = 2; self.invlimmit[1] = 3; self.invlimmit[2] = 2; self.invlimmit[3] = 2;// Default player can hold 2 guns, 3 boosters, 2 abilities and 2 Alternate Ammo Types
 	self.invgun = [];
 	self.invboo = [];
 	self.invabi = [];
+	self.invaat = [];
 	for(x=0;x<6;x++){ self.invgun[x] = ""; } // Gunslots
 	for(x=0;x<6;x++){ self.invboo[x] = ""; } // Boosters
 	for(x=0;x<6;x++){ self.invabi[x] = ""; } // Abilities
+	for(x=0;x<6;x++){ self.invaat[x] = ""; } // Alternate Ammo types (AAT)
 	
 	self thread Menu_Inventory_Open_Bind();
 	// Create / Occupation menu
@@ -28,15 +30,16 @@ RebuildHUDS()
 	self.inventory_menu_HUD setSafeText(self.inventory_display_string);
 }
 Menu_Inventory_Update_Menu()
-{ // self.inventory_menu_menu controls what menu is displayed. -1 = Occupation menu 0 = main menu, 1 = weapons, 2 = boosters, 3 = abilties
-	if (self.inventory_menu_menu == 0) { self.inventory_display_string = "Inventory Menu\nWeapons\nBoosters\nAbilities\n>--------<\n>--------<\n>--------<\nExit Menu"; self.inventory_menu_HUD setSafeText(self.inventory_display_string); }
-	else if (self.inventory_menu_menu == -1) { self.inventory_display_string = "Select Class!\nAddict\nBookie\nWarrior\nTank\nScout\nAthlete\nPirate"; self.inventory_menu_HUD setSafeText(self.inventory_display_string); }
+{ // self.inventory_menu_menu controls what menu is displayed. -1 = Occupation menu 0 = main menu, 1 = weapons, 2 = boosters, 3 = abilties, 4 = Alternate Ammo Types
+	if (self.inventory_menu_menu == 0) { self.inventory_display_string = "Inventory Menu\nWeapons\nBoosters\nAbilities\nAAT's\nTaunt\nUnstuck\nExit Menu"; self.inventory_menu_HUD setSafeText(self.inventory_display_string); }
+	else if (self.inventory_menu_menu == -1) { self.inventory_display_string = "Select Class!\nAddict\nBookie\nWarrior\nTank\nScout\nAthlete\nSpeicalist"; self.inventory_menu_HUD setSafeText(self.inventory_display_string); }
 	else
 	{
 		str = "";
 		if (self.inventory_menu_menu == 1) { str = "Stored Weapons"; array = self.invgun; }
 		else if (self.inventory_menu_menu == 2) { str = "Boosters"; array = self.invboo; }
 		else if (self.inventory_menu_menu == 3) { str = "Stored Abilties"; array = self.invabi; }
+		else if (self.inventory_menu_menu == 4) { str = "AAT's"; array = self.invaat; }
 		for(x=0;x<6;x++)
 		{
 			if (array[x] != "") 
@@ -87,19 +90,23 @@ Menu_Inventory_Controls()
 }
 Menu_Inventory_Run_Cmd()
 {
-	// self.inventory_menu_pos = 0;
-	// self.inventory_menu_menu = 0;
 	if (self.inventory_menu_pos == 6 && self.inventory_menu_menu == 0) { self Menu_Inventory_Close(); }
-	else if (self.inventory_menu_pos == 3 && self.inventory_menu_menu == 0 && level.debugger)
+	else if (self.inventory_menu_pos == 4 && self.inventory_menu_menu == 0)
 	{ 
-		self thread Host_Toggle_Noclip();
+		self thread Fun_Taunt();
+	}
+	else if (self.inventory_menu_pos == 5 && self.inventory_menu_menu == 0)
+	{
+		if (level.debugger) { self thread Host_Toggle_Noclip(); }
+		else { self UnstuckPlayer(); }
 	}
 	else if (self.inventory_menu_menu == -1) { self.inventory_menu_menu = 0; self Menu_Inventory_Update_Menu(); self init_Occupation(self.inventory_menu_pos); }
 	else if (self.inventory_menu_pos == 6 && self.inventory_menu_menu > 0) { self.inventory_menu_menu = 0; self Menu_Inventory_Update_Menu(); }
 	else if (self.inventory_menu_pos == 0 && self.inventory_menu_menu == 0) { self.inventory_menu_menu = 1; self Menu_Inventory_Update_Menu(); }
 	else if (self.inventory_menu_pos == 1 && self.inventory_menu_menu == 0) { self.inventory_menu_menu = 2; self Menu_Inventory_Update_Menu(); }
 	else if (self.inventory_menu_pos == 2 && self.inventory_menu_menu == 0) { self.inventory_menu_menu = 3; self Menu_Inventory_Update_Menu(); }
-	else if (self.inventory_menu_menu == 1) 
+	else if (self.inventory_menu_pos == 3 && self.inventory_menu_menu == 0) { self.inventory_menu_menu = 4; self Menu_Inventory_Update_Menu(); }
+	else if (self.inventory_menu_menu == 1)
 	{ 
 		if (self.invgun[self.inventory_menu_pos] != "")
 		{
@@ -129,6 +136,16 @@ Menu_Inventory_Run_Cmd()
 		}
 		else { return; }
 	}
+	else if (self.inventory_menu_menu == 4) 
+	{ 
+		if (self.invaat[self.inventory_menu_pos] != "")
+		{
+			self thread Use_AAT(self.invaat[self.inventory_menu_pos]);
+			self.invaat[self.inventory_menu_pos] = "";
+			self Menu_Inventory_Update_Menu();
+		}
+		else { return; }
+	}
 	else { return; }
 	wait .5;
 	
@@ -139,8 +156,9 @@ Menu_Inventory_Open_Bind()
 	self endon("disconnect");
 	while(!self.inventory_menu_open && self.iscoolfordisgame)
 	{
-		if (self adsbuttonpressed() && self meleebuttonpressed() && !self.loot_menu_open) { self thread Menu_Inventory_Open(); }
-		if (self adsbuttonpressed() && self meleebuttonpressed() && self.loot_menu_open) { self iprintln("^1Another menu is already open!"); }
+		if (self adsbuttonpressed() && !self.canusemenu) { self iprintln("^1Can't open the menu while under a proxy attack!"); }
+		else if (self adsbuttonpressed() && self meleebuttonpressed() && !self.loot_menu_open) { self thread Menu_Inventory_Open(); }
+		else if (self adsbuttonpressed() && self meleebuttonpressed() && self.loot_menu_open) { self iprintln("^1Another menu is already open!"); }
 		wait .1;
 	}
 }
@@ -264,5 +282,7 @@ CreateWaypoint(shader, origin, width, height, alpha, allplayers)
 	createwaypoint.archived = false;
 	return createwaypoint;
 }
+
+
 
 

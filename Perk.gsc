@@ -80,10 +80,48 @@ Perk_Resistance()
 	else { self iprintln("You were given a perk you already have.\nThe hearty booster effect was trigerd instead");  self notify("booster_hearty"); self thread Booster_Hearty(); }
 
 }
+Perk_Mulekick()
+{
+	if (!self.zperks[5])
+	{
+		self.zperks[5] = true;
+		self GiveWeapon("knife_held_mp");
+		self setperk("specialty_twogrenades");
+		self setperk("specialty_twoprimaries");
+		self iprintln("^2Mule kick added!");
+	}
+	else { self iprintln("You were given a perk you already have.\nThe hearty booster effect was trigerd instead");  self notify("booster_hearty"); self thread Booster_Hearty(); }
+}
+Perk_sixithsense()
+{
+	self endon("death");
+	self endon("disconnect");
+	self endon("perk_stop_sixithsense");
+	if (!self.zperks[6])
+	{
+		self.zperks[6] = true;
+		self iprintln("^26th Sense added!");
+		while(self.zperks[6])
+		{
+			foundone = false;
+			foreach(player in level.players)
+			{
+				if (isAlive(player) && Distance(player.origin, self.origin) < 250 && self != player && !foundone)
+				{
+					self iprintlnbold("^1Nearby players detected!");
+					foundone = true;
+				}
+			}
+			wait .5;
+		}
+	}
+	else { self iprintln("You were given a perk you already have.\nThe hearty booster effect was trigerd instead");  self notify("booster_hearty"); self thread Booster_Hearty(); }
+
+}
 Reset_Perks()
 {
 	self.zperks = [];
-	for(x = 0 ; x < 5; x++)
+	for(x = 0 ; x < 7; x++)
 		self.zperks[x] = false;
 }
 Giveallperks()
@@ -149,6 +187,8 @@ Giveallperks()
 	self setmovespeedscale(1.2);
 	self SetClientUIVisibilityFlag("g_compassShowEnemies", 1);
 }
+
+
 
 
 

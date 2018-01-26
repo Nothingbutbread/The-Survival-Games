@@ -27,13 +27,17 @@ Spawn_LootCrate(index, location) // Generic loot crate. Contents generated are p
 		{
 			foreach(player in level.players)
 			{
-				if (Distance(player.origin, level.lc[location]) < 60)
+				if (Distance(player.origin, level.lc[location]) < 50)
 				{
-					if (player meleebuttonpressed() && !player.inventory_menu_open && !player.loot_menu_open)
+					if (player meleebuttonpressed() && !player.inventory_menu_open && !player.loot_menu_open && player.canusemenu)
 					{
 						player thread giveSupplyDrop();
 						killloop = true;
 						break;
+					}
+					if (player meleebuttonpressed() && !player.canusemenu)
+					{
+						player iprintln("^1Can't open loot box while under a proxy attack!");
 					}
 				}
 			}
@@ -133,3 +137,5 @@ BlackListedZone(cor1,cor2)
 		}
 	}
 }
+
+
