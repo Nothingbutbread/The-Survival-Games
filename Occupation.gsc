@@ -46,6 +46,7 @@ init_Occupation(in)
 		self Perk_Resistance();
 		self Perk_Scrounger();
 		self Perk_Staminia_up();
+		self.occupation_bonus = true;
 		self thread Occupation_Scout_Streaker();
 		self iprintln("You selected the Scout Class!");
 		self iprintln("^2Your first lootbox will have a sniper. Birds Eye view lasts twice as long.\n3 kills and on autogive a Birds eye view booster effect.");

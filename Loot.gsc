@@ -18,11 +18,13 @@ Give_Cool_Perk(str)
 Use_Ability(str)
 {
 	self notify("new_ability");
+	self.resistanceabilityactive = false;
 	if (str == "Double Tap II" ) { self thread Ability_DoubleTap2(); }
 	else if (str == "Unlimmited Ammo") { self thread Ability_UnlimmitedAmmo(); }
 	else if (str == "Gun Game") { self thread Ability_GunGame(); }
 	else if (str == "Electric Cherry") { self thread Ability_ElectricCherry(); }
 	else if (str == "Dynamic Camo") { self thread Ability_DynamicCamo(); }
+	else if (str == "Resistant") { self.resistanceabilityactive = true; self iprintln("^5Resistance Ability ^2Active!"); }
 }
 Use_Booster(str)
 {
@@ -48,14 +50,15 @@ Use_AAT(str)
 	else if (str == "Shell Shock") { self thread AAT_ShellShock(); }
 	else if (str == "Proxy Attack") { self thread AAT_ProxyAttack(); }
 	else if (str == "Recon Palse") { self thread AAT_ReconPaluse(); }
-	else if (str == "EMP") { }
-	else if (str == "Drained") { }
+	else if (str == "EMP") { self thread AAT_EMP(); }
+	else if (str == "Drained") { self thread AAT_Drained(); }
 	else if (str == "Explosive Bullets") { self thread AAT_ExplosiveBullets(); }
 }
 Booster_Speedo()
 {
 	self endon("death");
 	self endon("disconnect");
+	self endon("new_booster");
 	self endon("booster_speedo");
 	self iprintlnbold("^5The Speedo Booster is now ^2Active!");
 	self setmovespeedscale(self.basespeed * 2);
@@ -71,6 +74,7 @@ Booster_Hearty()
 {
 	self endon("death");
 	self endon("disconnect");
+	self endon("new_booster");
 	self endon("booster_hearty");
 	self.maxhealth = 200;
 	self.health = self.maxhealth;
@@ -115,6 +119,7 @@ Booster_True_Unlimmited_Ammo()
 {
 	self endon("death");
 	self endon("disconnect");
+	self endon("new_booster");
 	self endon("booster_tua");
 	tick = 50;
 	if (self.occupation == "Addict") { tick = 75; }
@@ -163,7 +168,7 @@ Booster_TeleportToLootBox()
 }
 Booster_IncreasedBaseStats()
 {
-	inc = RandomIntRange(2,9); // 2 - 8 
+	inc = RandomIntRange(3,11); // 3 - 10
 	incs = inc / 100;
 	if (self.basespeed < 2.5) { self.basespeed += incs; } 
 	if (self.curspeed < self.basespeed) { self setmovespeedscale(self.basespeed); }
@@ -289,12 +294,13 @@ Ability_ElectricCherry()
 ////////////////////////////////////////////
 Loot_Ability()
 {
-	per = RandomIntRange(0, 5);
+	per = RandomIntRange(0, 6);
 	if (per == 0) { return "Double Tap II"; }
 	else if (per == 1) { return "Unlimmited Ammo"; }
 	else if (per == 2) { return "Gun Game"; }
 	else if (per == 3) { return "Electric Cherry"; }
 	else if (per == 4) { return "Dynamic Camo"; }
+	else if (per == 5) { return "Resistant"; }
 }
 Loot_Booster()
 {
@@ -324,7 +330,7 @@ Loot_Perk()
 }
 Loot_AAT()
 {
-	per = RandomIntRange(0, 8);
+	per = RandomIntRange(0, 10);
 	if (per == 0) { return "Explosive Decoy"; }
 	else if (per == 1) { return "Explosive Trap"; }
 	else if (per == 2) { return "Rocket Launcher"; }
@@ -375,7 +381,7 @@ Loot_Warrior_First()
 Loot_Scout_First()
 {
 	att = RandIntArrayNoDupe(3, 10, 21);
-	gun = RandomIntRange(19,39);
+	gun = RandomIntRange(39,43);
 	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
 	return str;
 }

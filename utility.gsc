@@ -136,6 +136,7 @@ whatisthatobject(str)
 	else if ("Electric Cherry" == str) { return 3; } 
 	else if ("Dynamic Camo" == str) { return 3; } 
 	else if ("Gun Game" == str) { return 3; }
+	else if ("Resistant" == str) { return 3; }
 	else if ("Explosive Decoy" == str) { return 4; }
 	else if ("Explosive Trap" == str) { return 4; }
 	else if ("Rocket Launcher" == str) { return 4; }

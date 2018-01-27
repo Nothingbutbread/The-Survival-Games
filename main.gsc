@@ -31,6 +31,7 @@ init()
     level thread onPlayerConnect();
     level thread init_SurvivalGames();
     if (!level.debugger) { registernumlives(1, 100); }
+    registertimelimit( 0, 0);
 }
 
 onPlayerConnect()
@@ -206,11 +207,15 @@ onPlayerDeath()
 	level.lastkilled = self;
 	if (self.inventory_menu_open) { self thread Menu_Inventory_Close(); }
 	else if (self.loot_menu_open) { self thread Menu_Loot_Close(); }
+	if (self.istargted) { level.targtedplayers--; }
+	if (isDefined(self.waypointHUD)) { self.waypointHUD destroy(); }
 }
 onPlayerDisconnect()
 {
+	self endon("death");
 	self waittill("disconnect");
 	if (self.istargted) { level.targtedplayers--; }
+	if (isDefined(self.waypointHUD)) { self.waypointHUD destroy(); }
 }
 WatchForFallOutOfMap()
 {

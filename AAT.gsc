@@ -37,11 +37,11 @@ AAT_Spawn_FakeLootCrate(index, location, placer) // Fake loot crate, intended as
 						iprintln(Fun_taunt_trap(placer, player));
 						foreach(player in level.players)
 						{
-							if (Distance(player.origin, obj.origin) < 300)
+							if (Distance(player.origin, obj.origin) < 150)
 							{ player DoDamage(999, player.origin, placer, placer, "none", "MOD_BURNED", 0, "supplydrop_mp"); }
-							else if (Distance(player.origin, obj.origin) < 450)
+							else if (Distance(player.origin, obj.origin) < 200)
 							{ player DoDamage(140, player.origin, placer, placer, "none", "MOD_BURNED", 0, "supplydrop_mp"); }
-							else if (Distance(player.origin, obj.origin) < 600)
+							else if (Distance(player.origin, obj.origin) < 325)
 							{ player DoDamage(90, player.origin, placer, placer, "none", "MOD_BURNED", 0, "supplydrop_mp"); }
 						}
 					}
@@ -111,11 +111,11 @@ AAT_ExplosiveTrap(placer, location)
 				tripped = true;
 				foreach(player in level.players)
 				{
-					if (Distance(player.origin, obj.origin) < 350)
+					if (Distance(player.origin, obj.origin) < 150)
 					{ player DoDamage(999, player.origin, placer, placer, "none", "MOD_BURNED", 0, "frag_grenade_mp"); }
-					else if (Distance(player.origin, obj.origin) < 500)
+					else if (Distance(player.origin, obj.origin) < 225)
 					{ player DoDamage(140, player.origin, placer, placer, "none", "MOD_BURNED", 0, "frag_grenade_mp"); }
-					else if (Distance(player.origin, obj.origin) < 750)
+					else if (Distance(player.origin, obj.origin) < 300)
 					{ player DoDamage(90, player.origin, placer, placer, "none", "MOD_BURNED", 0, "frag_grenade_mp"); }
 				}
 				break;
@@ -141,7 +141,7 @@ AAT_ExplosiveBullets()
 	{
 		self waittill("weapon_fired");
 		target = self TraceShot();
-		RadiusDamage(target,100,75,50,self);
+		RadiusDamage(target,80,70,50,self);
 		ammo--;
 		wait 1;
 	}
@@ -167,7 +167,7 @@ AAT_RocketLauncher()
 		PlaySoundAtPosition("wpn_rocket_explode", bullet.origin);
 		foreach(player in level.players)
 		{
-			if (Distance(player.origin, target) < 550)
+			if (Distance(player.origin, target) < 300)
 			{
 				player DoDamage(999, player.origin, self, self, "none", "MOD_PROJECTILE_SPLASH", 0, "remote_missile_bomblet_mp");
 			}
@@ -240,9 +240,9 @@ AAT_ShellShock()
 AAT_ShellShock_Effect()
 {
 	a = RandomIntRange(-180, 180);
-	if (a < 0) { a -= 180; }
+	if (a < 0) { a -= 180; NoN(a); }
 	b = RandomIntRange(-180, 180);
-	if (b < 0) { b -= 180; }
+	if (b < 0) { b -= 180; NoN(b); }
 	self setPlayerAngles((a,b,0));
 	self playlocalsound("wpn_rocket_explode_brick");
 	self playlocalsound("wpn_rocket_explode_brick");
@@ -315,22 +315,95 @@ AAT_ReconPaluse()
 AAT_ReconPaluse_Effect()
 {
 	self endon("disconnect");
+	self endon("death");
 	level.targtedplayers++;
 	self.istargted = true;
-	tracker = self CreateWaypoint("perk_awareness", self.origin, 8, 8, .9, true);
+	self.waypointHUD Destroy();
+	self.waypointHUD = self CreateWaypoint("perk_awareness", self.origin, 8, 8, .9, true);
 	tick = 0;
 	while(tick < 50)
 	{
 		wait .2;
-		tracker moveOverTime(.05);
-		tracker.x = self.origin[0];
-		tracker.y = self.origin[1];
-		tracker.z = self.origin[2];
+		self.waypointHUD moveOverTime(.05);
+		self.waypointHUD.x = self.origin[0];
+		self.waypointHUD.y = self.origin[1];
+		self.waypointHUD.z = self.origin[2];
 		wait .05;
 		tick++;
 		
 	}
-	tracker Destroy();
+	self.waypointHUD Destroy();
 	level.targtedplayers--;
 	self.istargted = false;
+}
+AAT_EMP()
+{
+	self endon("death");
+	self endon("disconnect");
+	self endon("new_AAT");
+	self iprintlnbold("^6EMP bullets Activated!");
+	ammo = 5;
+	if (self.occupation == "Speicalist") { ammo = 10; }
+	while(ammo > 0)
+	{
+		self waittill("weapon_fired");
+		target = self TraceShot();
+		foreach(player in level.players)
+		{
+			if (Distance(player.origin, target) < 500)
+			{ player thread AAT_EMP_Effect(); }
+		}
+		ammo--;
+		if (ammo == 0) { break; }
+		wait 8;
+	}
+	self iprintln("^1No more EMP bullets remain!");
+}
+AAT_EMP_Effect()
+{
+	if (self.resistanceabilityactive) { return; } // Effect Blocked!
+	self iprintln("^1Hit by an EMP bullet!");
+	self notify("new_booster");
+	self notify("new_ability");
+	self notify("new_AAT");
+	// Closes menu
+	if (self.inventory_menu_open) { self thread Menu_Inventory_Close(); }
+	else if (self.loot_menu_open) { self thread Menu_Loot_Close(); }
+	self show(); // Counters Vanish Booster
+	self SetClientUIVisibilityFlag("g_compassShowEnemies", 0); // Counters Birds Eye View Booster
+	
+}
+AAT_Drained()
+{
+	self endon("death");
+	self endon("disconnect");
+	self endon("new_AAT");
+	self iprintlnbold("^6Drained bullets Activated!");
+	ammo = 4;
+	if (self.occupation == "Speicalist") { ammo = 8; }
+	while(ammo > 0)
+	{
+		self waittill("weapon_fired");
+		target = self TraceShot();
+		foreach(player in level.players)
+		{
+			if (Distance(player.origin, target) < 450)
+			{ player thread AAT_Drained_Effect(); }
+		}
+		ammo--;
+		if (ammo == 0) { break; }
+		wait 10;
+	}
+	self iprintln("^1No more Drained bullets remain!");
+}
+AAT_Drained_Effect()
+{
+	foreach (gun in self GetWeaponsList())
+	{
+		if (gun != "knife_held_mp")
+		{
+			self setWeaponAmmoClip(gun, 0);
+		}
+	}
+	self iprintln("^1Your guns mag was drained!");
 }
