@@ -64,6 +64,9 @@ Perk_Resistance()
 	if (!self.zperks[4])
 	{
 		self.zperks[4] = true;
+		self setperk("specialty_fireproof");
+		self setperk("specialty_flakjacket");
+		self setperk("specialty_flashprotection");
 		self setperk("specialty_immunecounteruav");
 		self setperk("specialty_immuneemp");
 		self setperk("specialty_immunemms");
@@ -106,7 +109,7 @@ Perk_sixithsense()
 			foundone = false;
 			foreach(player in level.players)
 			{
-				if (isAlive(player) && Distance(player.origin, self.origin) < 250 && self != player && !foundone)
+				if (isAlive(player) && Distance(player.origin, self.origin) < 350 && self != player && !foundone)
 				{
 					self iprintlnbold("^1Nearby players detected!");
 					foundone = true;
@@ -187,6 +190,20 @@ Giveallperks()
 	self setmovespeedscale(1.2);
 	self SetClientUIVisibilityFlag("g_compassShowEnemies", 1);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

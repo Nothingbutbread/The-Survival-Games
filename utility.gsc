@@ -1,13 +1,3 @@
-getOrigin()
-{
-	self endon("death");
-	self endon("disconnect");
-	while(true)
-	{
-		self iprintln(self.origin);
-		wait 3;
-	}
-}
 StartingLoadout()
 {
 	self SetActionSlot(1, "");
@@ -137,6 +127,7 @@ whatisthatobject(str)
 	else if ("Dynamic Camo" == str) { return 3; } 
 	else if ("Gun Game" == str) { return 3; }
 	else if ("Resistant" == str) { return 3; }
+	else if ("Blood to Lead" == str) { return 3; }
 	else if ("Explosive Decoy" == str) { return 4; }
 	else if ("Explosive Trap" == str) { return 4; }
 	else if ("Rocket Launcher" == str) { return 4; }
@@ -147,6 +138,7 @@ whatisthatobject(str)
 	else if ("EMP" == str) { return 4; }
 	else if ("Drained" == str) { return 4; }
 	else if ("Explosive Bullets" == str) { return 4; }
+	else if ("<null>" == str) { return 4; }
 	else if ("Speed Cola" == str) { return 9; } 
 	else if ("Double Tap" == str) { return 9; } 
 	else if ("Stamina Up" == str) { return 9; } 
@@ -201,12 +193,6 @@ DisplayStringMod(string, limmit)
 	}
 	else { s = string; }
 	return s;
-}
-AntiEndgame()
-{
-	level.hostforcedend = 1;
-	self waittill( "menuresponse" );
-	level.hostforcedend = 0;
 }
 playerAnglesToForward(player, distance)
 {
@@ -301,3 +287,215 @@ UnstuckPlayer()
 	}
 	else { self suicide(); }
 }
+Menu_Inventory_Info_Bar_Update_Mapping()
+{
+	if (self.eastereggeffect) { self.infobarstr2 = "<null> <null> | <null> <null> | <null> / <null> <null> <null>/<null>"; }
+	else { self.infobarstr2 = "[{+usereload}] Select | [{+gostand}] Close menu | [{+actionslot 1}] / [{+actionslot 2}] Move Up/Down"; }
+	if (self.inventory_menu_menu == -1)
+	{
+		if (self.inventory_menu_pos == 0)
+		{
+			self.infobarstr1 = "^3Addict^7: ^5Increased booster durration. Given the ability Resistant and the booster Loot Box Hack";
+			self.infobarstr2 = "^7On kill: Max health goes up by 6, Movement speed goes up by 6 percent.";
+		}
+		else if (self.inventory_menu_pos == 1)
+		{
+			self.infobarstr1 = "^3Bookie^7: ^5Better chance of obtaining Uncommon and Rare Loot boxes (65/25/10) -> (45/35/20)";
+			self.infobarstr2 = "^7Min items per loot box increased by 1. 2 kill streak makes the next loot box rare. 3 kill streak maxes inventory space.";
+		}
+		else if (self.inventory_menu_pos == 2)
+		{
+			self.infobarstr1 = "^3Warrior^7: ^5Start with Speed cola and Resistance perks and max storage space for weapons.";
+			self.infobarstr2 = "^7The next lootbox you open will have an automatic weapon or riffle. 3 kill streak gives you all perks.";
+		}
+		else if (self.inventory_menu_pos == 3)
+		{
+			self.infobarstr1 = "^3Tank^7: ^5Start with 150 health and max inventory space.";
+			self.infobarstr2 = "^7On kill: The weapon you are holdings mag gets auto-refilled. Hearty boosters have double durration.";
+		}
+		
+		else if (self.inventory_menu_pos == 4)
+		{
+			self.infobarstr1 = "^3Scout^7: ^5Given stealth perks, The next you loot box will have a sniper riffle.";
+			self.infobarstr2 = "^7On kill after 2 killstreak: Autotrigger a Birds Eye view booster. Birds Eye view boosters have double durration.";
+		}
+		else if (self.inventory_menu_pos == 5)
+		{
+			self.infobarstr1 = "^3Athlete^7: ^5Move 20 percent faster and have speed perks with no fall dammage.";
+			self.infobarstr2 = "^73 kill streak gives you a 40 percent additional speed. Speedo boosters have double durration.";
+		}
+		else if (self.inventory_menu_pos == 6)
+		{
+			self.infobarstr1 = "^3Specialist^7: ^5Double ammo for AAT's with 2+ ammo. The next loot box you open will have an AAT.";
+			self.infobarstr2 = "^73 kill streak gives 25 extra health and 20 percent extra speed. Increased chance for AAT's in Loot boxes.";
+		}
+	}
+	else if (self.inventory_menu_menu == 0 && !self.loot_menu_open)
+	{
+		if (self.inventory_menu_pos == 0)
+		{ self.infobarstr1 = "^3Weapons^7: ^5Opens the Weapons inventory. Select weapons there to swap your held weapon with them."; }
+		else if (self.inventory_menu_pos == 1)
+		{ self.infobarstr1 = "^3Boosters^7: ^5Opens the Boosters inventory. Select boosters there to use them."; }
+		else if (self.inventory_menu_pos == 2)
+		{ self.infobarstr1 = "^3Abilities^7: ^5Opens the Abilities inventory. Select Abilities there to change your active ability."; }
+		else if (self.inventory_menu_pos == 3)
+		{ self.infobarstr1 = "^3AAT's^7: ^5Opens the Alternate Ammo Type inventory. Select AAT's there to change your active bullet effect."; }
+		else if (self.inventory_menu_pos == 4)
+		{ self.infobarstr1 = "^3Taunt^7: ^5Prints a random message to the kill feed. Can only do so every 8 seconds."; }
+		else if (self.inventory_menu_pos == 5)
+		{ self.infobarstr1 = "^3Utility Menu^7: ^5Opens a menu with utility options such as Unstuck and developer only commands."; }
+		else if (self.inventory_menu_pos == 6)
+		{ self.infobarstr1 = "^3Exit Menu^7: ^5Closes the menu."; }
+
+	}
+	else if (self.inventory_menu_menu == 1 && !self.loot_menu_open)
+	{
+		if (isDefined(self.invgun[self.inventory_menu_pos]) && self.invgun[self.inventory_menu_pos] != "")
+		{ self.infobarstr1 = "Swaps held gun with " + DisplayStringMod(self.invgun[self.inventory_menu_pos], 25); }
+		else if (self.inventory_menu_pos == 6)
+		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
+		else
+		{ self.infobarstr1 = "^1Empty gun slot! You can't do anything with that right now"; }
+	}
+	else if (self.inventory_menu_menu == 2 && !self.loot_menu_open)
+	{
+		if (!isDefined(self.invboo[self.inventory_menu_pos]) || self.inventory_menu_pos == 6)
+		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
+		else
+		{
+			if (self.invboo[self.inventory_menu_pos] == "")
+			{ self.infobarstr1 = "^1Empty booster slot! You can't do anything with that right now."; }
+			else if (self.invboo[self.inventory_menu_pos] == "Hearty")
+			{ self.infobarstr1= "^3Hearty^7: Increases health to 200 for 13 seconds. Addict: 22 / Tank: 26"; }
+			else if (self.invboo[self.inventory_menu_pos] == "Speedo")
+			{ self.infobarstr1= "^3Speedo^7: Doubles base speed. Stacks with speed bonuses for 15 seconds. Addict: 25 / Athlete: 30"; }
+			else if (self.invboo[self.inventory_menu_pos] == "Quick Heal")
+			{ self.infobarstr1 = "^3Quick Heal^7: Instantly heal to full health. Clears negtive states."; }
+			else if (self.invboo[self.inventory_menu_pos] == "Vanish")
+			{ self.infobarstr1 = "^3Vanish^7: Go invisable for 15 seconds. Can't shoot while active. Addict: 25 / Scout: 30"; }
+			else if (self.invboo[self.inventory_menu_pos] == "Restock")
+			{ self.infobarstr1 = "^3Restock^7: Refills your guns ammo."; }
+			else if (self.invboo[self.inventory_menu_pos] == "Unlimmited Clip")
+			{ self.infobarstr1 = "^3Unlimmited Clip^7: Unlimmited Clip Ammo for 10 seconds. Addict: 16 / Warrior: 20"; }
+			else if (self.invboo[self.inventory_menu_pos] == "New Camo")
+			{ self.infobarstr1 = "^3New Camo^7: Applies a random camo to your held gun. Refills it too."; }
+			else if (self.invboo[self.inventory_menu_pos] == "Birds Eye View")
+			{ self.infobarstr1 = "^3Birds Eye View^7: Activates constant UAV for 15 seconds. Addict: 25 / Scout: 30"; }
+			else if (self.invboo[self.inventory_menu_pos] == "Loot Box Hack")
+			{ self.infobarstr1 = "^3Loot Box Hack^7: Teleport to a random active loot box"; }
+			else if (self.invboo[self.inventory_menu_pos] == "Inv Upgrade")
+			{ self.infobarstr1 = "^3Inventory Upgrade^7: Increases one of capacity of one of your inventorys by 1."; }
+			else if (self.invboo[self.inventory_menu_pos] == "Stat Upgrade")
+			{ self.infobarstr1= "^3Stat Upgrade^7: Increases your speed and health by a small ammout."; }
+		}
+	}
+	else if (self.inventory_menu_menu == 3 && !self.loot_menu_open)
+	{
+		if (!isDefined(self.invabi[self.inventory_menu_pos]) || self.inventory_menu_pos == 6)
+		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
+		else
+		{
+			if (self.invabi[self.inventory_menu_pos] == "")
+			{ self.infobarstr1 = "^1Empty Ability slot! You can't do anything with that right now."; }
+			else if (self.invabi[self.inventory_menu_pos] == "Double Tap II")
+			{ self.infobarstr1 = "^3Double Tap II^7: Shoot an extra bullet when you shoot. Only works on bullet weapons."; }
+			else if (self.invabi[self.inventory_menu_pos] == "Unlimmited Ammo")
+			{ self.infobarstr1 = "^3Unlimmited Ammo^7: The stock of you weapons are unlimmited."; }
+			else if (self.invabi[self.inventory_menu_pos] == "Electric Cherry")
+			{ self.infobarstr1 = "^3Electric Cherry^7: Damamge nearby players when you reload."; }
+			else if (self.invabi[self.inventory_menu_pos] == "Dynamic Camo")
+			{ self.infobarstr1 = "^3Dynamic Camo^7: Get a new camo on your gun once every 15 seconds."; }
+			else if (self.invabi[self.inventory_menu_pos] == "Gun Game")
+			{ self.infobarstr1 = "^3Gun Game^7: Get a new gun once every 15 seconds."; }
+			else if (self.invabi[self.inventory_menu_pos] == "Resistant")
+			{ self.infobarstr1 = "^3Resistant^7: Block the effects of several AAT's including the explosive decoy."; }
+			else if (self.invabi[self.inventory_menu_pos] == "Blood to Lead")
+			{ self.infobarstr1 = "^3Blood to Lead^7: Taking dammage refills your ammo."; }
+		}
+	}
+	else if (self.inventory_menu_menu == 4 && !self.loot_menu_open)
+	{
+		if (!isDefined(self.invaat[self.inventory_menu_pos]) || self.inventory_menu_pos == 6)
+		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
+		else
+		{
+			if (self.invaat[self.inventory_menu_pos] == "")
+			{ self.infobarstr1 = "^1Empty Alternate Ammo Type slot! You can't do anything with that right now."; }
+			else if (self.invaat[self.inventory_menu_pos] == "Explosive Decoy")
+			{ self.infobarstr1 = "^3Explosive Decoy^7: 1 shot, Spawns an fake loot box that explodes when opened."; }
+			else if (self.invaat[self.inventory_menu_pos] == "Explosive Trap")
+			{ self.infobarstr1 = "^3Explosive Trap^7: 1 shot, Spawns an package that explodes when someone is nearby."; }
+			else if (self.invaat[self.inventory_menu_pos] == "Rocket Launcher")
+			{ self.infobarstr1 = "^3Rocket Launcher^7: 2 shots, Shoots a rocket that hits the target after 2 seconds."; }
+			else if (self.invaat[self.inventory_menu_pos] == "Slug Ray")
+			{ self.infobarstr1 = "^3Slug Ray^7: 5 shots, Sets effected players speed to 25 percent of normal speed."; }
+			else if (self.invaat[self.inventory_menu_pos] == "Shell Shock")
+			{ self.infobarstr1 = "^3Shell Shock^7: 6 shots, Plays loud noises and randomly sets effected players angles."; }
+			else if (self.invaat[self.inventory_menu_pos] == "Proxy Attack")
+			{ self.infobarstr1 = "^3Proxy Attack^7: 3 shots, disables effected players menu for 15 seconds."; }
+			else if (self.invaat[self.inventory_menu_pos] == "Recon Palse")
+			{ self.infobarstr1 = "^3Recon Palse^7: 4 shots, Nearby players are tagged for 15 seconds. Tags visable though walls."; }
+			else if (self.invaat[self.inventory_menu_pos] == "EMP")
+			{ self.infobarstr1 = "^3EMP^7: 5 shots, Nearby players active abilities, AAT's and boosters are disabled."; }
+			else if (self.invaat[self.inventory_menu_pos] == "Drained")
+			{ self.infobarstr1 = "^3Drained^7: 4 shots, Nearby players weapons loss thier mags."; }
+			else if (self.invaat[self.inventory_menu_pos] == "Explosive Bullets")
+			{ self.infobarstr1 = "^3Explosive Bullets^7: 5 shots, Nearby players take dammage."; }
+			else if (self.invaat[self.inventory_menu_pos] == "<null>")
+			{ self.infobarstr1 = "^3<null>^7: <null> <null><null> <null> <null> <null> <null><null>"; }
+		}
+	}
+	else if (self.inventory_menu_menu == 7 && !self.loot_menu_open)
+	{
+		if (self.inventory_menu_pos == 0 && self.savedfromthedepths)
+		{ self.infobarstr1 = "^3Unstuck^7: ^5Teleports you back to your spawn point. Can only be used once. Falling out of the map uses it."; }
+		else if (self.inventory_menu_pos == 0 && !self.savedfromthedepths)
+		{ self.infobarstr1 = "^3Unstuck^7: ^1Will kill you!^5 You've already used your save me token this game!"; }
+		else if (self.inventory_menu_pos == 1)
+		{ self.infobarstr1 = "^3Noclip^7: ^5Allows you to move though walls and fly."; }
+		else if (self.inventory_menu_pos == 2)
+		{ self.infobarstr1 = "^3Godmode^7: ^5Disables death by normal means. Any command using sucide() will still kill you."; }
+		else if (self.inventory_menu_pos == 3)
+		{ self.infobarstr1 = "^3Print Origin^7: ^5Toggles the printing of your origin to the kill feed."; }
+		else if (self.inventory_menu_pos == 4)
+		{ self.infobarstr1 = "^3Common Loot Box^7: ^5Closes this menu and gives you a Common Loot Box."; }
+		else if (self.inventory_menu_pos == 5)
+		{ self.infobarstr1 = "^3Uncommon Loot Box^7: ^5Closes this menu and gives you a Uncommon Loot Box."; }
+		else if (self.inventory_menu_pos == 6)
+		{ self.infobarstr1 = "^3Rare Loot Box^7: ^5Closes this menu and gives you a Rare Loot Box."; }
+	}
+	else if (self.loot_menu_open)
+	{
+		if (self.eastereggeffect) { self.infobarstr2 = "<null> <null> <null> <null> | <null> <null> <null> | <null> / <null> <null> <null>/<null>"; }
+		else { self.infobarstr2 = "[{+usereload}] Move to Inv | [{+gostand}] Take All | [{+actionslot 1}] / [{+actionslot 2}] Move Up/Down"; }
+		if (isDefined(self.loot[self.loot_menu_pos]))
+		{
+			if (self.loot[self.loot_menu_pos] != "") 
+			{
+				in = whatisthatobject(self.loot[self.loot_menu_pos]);
+				if (in == 1) { self.infobarstr1 = "^3Weapon^7: " + DisplayStringMod(self.loot[self.loot_menu_pos], 16); }
+				else if (in == 2) { self.infobarstr1 = "^3Booster^7: " + self.loot[self.loot_menu_pos]; }
+				else if (in == 3) { self.infobarstr1 = "^3Ability^7: " + self.loot[self.loot_menu_pos]; }
+				else if (in == 4) { self.infobarstr1 = "^3[AAT] Aternate Ammo Type^7: " + self.loot[self.loot_menu_pos]; }
+				else if (in == 9) { self.infobarstr1 = "^3Perk^7: " + self.loot[self.loot_menu_pos] + " (used imedately)"; }
+				else { self.infobarstr1 = "^1Empty loot slot: ^3Nothing to see here!"; }
+			}
+			else { self.infobarstr1 = "^1Empty loot slot: ^3Nothing to see here!"; }
+		}
+		else { self.infobarstr1 = "^3Exit Menu^7: Exits the Loot box inventory!"; }
+	}
+	self.infobar_text_1 setSafeText(self.infobarstr1);
+	self.infobar_text_2 setSafeText(self.infobarstr2);
+}
+
+
+
+
+
+
+
+
+
+
+
+

@@ -6,15 +6,15 @@ Fun_Taunt()
 	{
 		self.cantaunt = false;
 		t = RandomIntRange(0,10);
-		iprintln(self.name + "^" + t + " " + Fun_Taunt_Text());
-		wait 8;
+		iprintln("^2" + self.name + ":^" + t + " " + Fun_Taunt_Text());
+		wait 7;
 		self.cantaunt = true;
 	}
-	else { self iprintln("You must wait atleast 8 seconds before taunting again."); }
+	else { self iprintln("You must wait atleast 7 seconds before taunting again."); }
 }
 Fun_Taunt_Text()
 {
-	t = RandomIntRange(0,53);
+	t = RandomIntRange(0,58);
 	if (t == 0) { return "it's time to die assholes!"; }
 	else if (t == 1) { return "I like the sound your corpse makes when I shoot it!"; }
 	else if (t == 2) { return "I will fuck yo moma harder than she did your face!"; }
@@ -48,7 +48,7 @@ Fun_Taunt_Text()
 	else if (t == 30) { return "<-- is a retard!"; }
 	else if (t == 31) { return "bomb! crack! ... sorry my dick is going at it!"; }
 	else if (t == 32) { return "I like ass!"; }
-	else if (t == 33) { return "you're so dumb, your playing Black ops 2!"; }
+	else if (t == 33) { return "your are so dumb, your playing Black ops 2!"; }
 	else if (t == 34) { return "fuck fuck fuck fuck fuck fuck fuck fuck you!"; }
 	else if (t == 35) { return "fuck you you you you you you you you you you!"; }
 	else if (t == 36) { return "come get me you bitches!"; }
@@ -68,6 +68,12 @@ Fun_Taunt_Text()
 	else if (t == 50) { return "Hey guys this is an M rated game and y'all sound like your under 17!"; }
 	else if (t == 51) { return "$ python3 fuckdisshit.py go kill yourself >> Good!"; }
 	else if (t == 52) { return "Subscribe to Nothingbutbread on youtube, he made this!"; }
+	else if (t == 53) { return "Goodbye douches!"; }
+	else if (t == 54) { return "I am the ^1H^2A^3C^1K^2E^3R ^1M^2A^3N^4!"; }
+	else if (t == 55) { return "No kid, I'm not using aimbot you just suck!"; }
+	else if (t == 56) { return "Time to push your buttons!\n^7[{+usereload}] [{+gostand}] [{+actionslot 1}] [{+actionslot 2}] [{+actionslot 3}] [{+actionslot 4}]"; }
+	else if (t == 57) { return "Press [{+actionslot 1}] for free dick in yo face!"; }
+
 }
 // A is the attacker
 // v in the victem
@@ -88,3 +94,17 @@ Fun_taunt_trap(a, v)
 	else if (t == 11) { return a.name + ": hey " + v.name + " your brains are missing!"; }
 	else if (t == 12) { return a.name + ": hey " + v.name + " you're dead again!"; }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -25,6 +25,7 @@ Use_Ability(str)
 	else if (str == "Electric Cherry") { self thread Ability_ElectricCherry(); }
 	else if (str == "Dynamic Camo") { self thread Ability_DynamicCamo(); }
 	else if (str == "Resistant") { self.resistanceabilityactive = true; self iprintln("^5Resistance Ability ^2Active!"); }
+	else if (str == "Blood to Lead") { self thread Ability_BloodToLead(); }
 }
 Use_Booster(str)
 {
@@ -53,6 +54,7 @@ Use_AAT(str)
 	else if (str == "EMP") { self thread AAT_EMP(); }
 	else if (str == "Drained") { self thread AAT_Drained(); }
 	else if (str == "Explosive Bullets") { self thread AAT_ExplosiveBullets(); }
+	else if (str == "<null>") { self thread AAT_EasterEgg(); }
 }
 Booster_Speedo()
 {
@@ -63,7 +65,7 @@ Booster_Speedo()
 	self iprintlnbold("^5The Speedo Booster is now ^2Active!");
 	self setmovespeedscale(self.basespeed * 2);
 	self.curspeed = self.basespeed * 2;
-	if (self.occupation == "Addict") { wait 20; }
+	if (self.occupation == "Addict") { wait 25; }
 	else if(self.occupation == "Athlete") { wait 30; }
 	else { wait 15; }
 	self setmovespeedscale(self.basespeed);
@@ -79,7 +81,8 @@ Booster_Hearty()
 	self.maxhealth = 200;
 	self.health = self.maxhealth;
 	self iprintlnbold("^5The Hearty Booster is now ^2Active!");
-	if (self.occupation == "Addict") { wait 20; }
+	if (self.occupation == "Addict") { wait 22; }
+	else if (self.occupation == "Tank") { wait 26; }
 	else { wait 13; }
 	self iprintlnbold("^5The Hearty Booster effect ^1Expired!");
 	self.maxhealth = self.basehealth;
@@ -98,7 +101,8 @@ Booster_Vanish()
 	self iprintln("Your weapons are disabled while the effect is active");
 	self disableWeapons();
 	self hide();
-	if (self.occupation == "Addict") { wait 17; }
+	if (self.occupation == "Addict") { wait 22; }
+	else if (self.occupation == "Scout") { wait 27; }
 	else { wait 12; }
 	self iprintlnbold("^3The Vanish Booster effect will expire in 3 seconds!");
 	wait 3;
@@ -122,8 +126,8 @@ Booster_True_Unlimmited_Ammo()
 	self endon("new_booster");
 	self endon("booster_tua");
 	tick = 50;
-	if (self.occupation == "Addict") { tick = 75; }
-	else if (self.occupation == "Tank") { tick = 100; }
+	if (self.occupation == "Addict") { tick = 80; }
+	else if (self.occupation == "Warrior") { tick = 100; }
 	self iprintlnbold("^5Unlimmited Clip Ammo ^2Active!");
 	self iprintln("^3This effect only works bullet weapons!");
 	self setWeaponAmmoClip(self.currentWeapon, weaponClipSize(self.currentWeapon));
@@ -151,9 +155,9 @@ Booster_BirdsEyeView()
 	self endon("booster_bev");
 	iprintln("^1" + self.name + " has Enabled UAV");
 	self SetClientUIVisibilityFlag("g_compassShowEnemies", 1);
-	if (self.occupation == "Addict") { wait 15; }
-	else if (self.occupation == "Scout") { wait 20; }
-	else { wait 10; }
+	if (self.occupation == "Addict") { wait 25; }
+	else if (self.occupation == "Scout") { wait 30; }
+	else { wait 15; }
 	self iprintlnbold("Birds Eye View has been ^1Disabled!");
 	self SetClientUIVisibilityFlag("g_compassShowEnemies", 0);
 }
@@ -168,7 +172,7 @@ Booster_TeleportToLootBox()
 }
 Booster_IncreasedBaseStats()
 {
-	inc = RandomIntRange(3,11); // 3 - 10
+	inc = RandomIntRange(6,13); // 6 - 12
 	incs = inc / 100;
 	if (self.basespeed < 2.5) { self.basespeed += incs; } 
 	if (self.curspeed < self.basespeed) { self setmovespeedscale(self.basespeed); }
@@ -180,7 +184,7 @@ Booster_IncreasedBaseStats()
 }
 Booster_IncreasedInventorySpace()
 {
-	n = 0;
+	n = [];
 	for(x=0;x<4;x++) { if (self.invlimmit[x] < 6) { n[n.size] = x; } }
 	if (n.size == 0) { self iprintln("Your inventory space was already at max.\nThe hearty booster effect was trigerd instead");  self notify("booster_hearty"); self thread Booster_Hearty(); }
 	else
@@ -233,7 +237,7 @@ Ability_DynamicCamo()
 	self endon("death");
 	self endon("disconnect");
 	self endon("new_ability");
-	self iprintlnbold("^5Dynamic Camo ^2Active!");
+	self iprintlnbold("^5Dynamic Camo ^2Actived!");
 	while(true)
 	{
 		camo = RandomIntRange(1,44);
@@ -242,12 +246,29 @@ Ability_DynamicCamo()
 		wait 10;
 	}
 }
+Ability_BloodToLead()
+{
+	self endon("death");
+	self endon("disconnect");
+	self endon("new_abilty");
+	self iprintlnbold("^5Blood to Lead ^2Activated!");
+	while(true)
+	{
+		if (self.health != self.maxhealth)
+		{
+			self setWeaponAmmoClip(self.currentWeapon, weaponClipSize(self.currentWeapon));
+			self giveMaxAmmo(self.currentWeapon);
+			wait .2;
+		}
+		wait .1;
+	}
+}
 Ability_UnlimmitedAmmo()
 {
 	self endon("death");
 	self endon("disconnect");
 	self endon("new_ability");
-	self iprintlnbold("^5Unlimmited Stock Ammo ^2Active!");
+	self iprintlnbold("^5Unlimmited Stock Ammo ^2Actived!");
 	while(true)
 	{
 		self giveMaxAmmo(self.currentWeapon);
@@ -259,7 +280,7 @@ Ability_GunGame()
 	self endon("death");
 	self endon("disconnect");
 	self endon("new_ability");
-	self iprintlnbold("^5Gun game ^2Active!");
+	self iprintlnbold("^5Gun game ^2Actived!");
 	while(true)
 	{
 		wait 15;
@@ -294,13 +315,14 @@ Ability_ElectricCherry()
 ////////////////////////////////////////////
 Loot_Ability()
 {
-	per = RandomIntRange(0, 6);
+	per = RandomIntRange(0, 7);
 	if (per == 0) { return "Double Tap II"; }
 	else if (per == 1) { return "Unlimmited Ammo"; }
 	else if (per == 2) { return "Gun Game"; }
 	else if (per == 3) { return "Electric Cherry"; }
 	else if (per == 4) { return "Dynamic Camo"; }
 	else if (per == 5) { return "Resistant"; }
+	else if (per == 6) { return "Blood to Lead"; }
 }
 Loot_Booster()
 {
@@ -330,7 +352,10 @@ Loot_Perk()
 }
 Loot_AAT()
 {
-	per = RandomIntRange(0, 10);
+	per = 3;
+	if (self.occupation != "Bookie")
+	{ per = RandomIntRange(0, 10); }
+	else { per = RandomIntRange(0, 11); } // The <null> AAT is only for Bookies
 	if (per == 0) { return "Explosive Decoy"; }
 	else if (per == 1) { return "Explosive Trap"; }
 	else if (per == 2) { return "Rocket Launcher"; }
@@ -341,13 +366,14 @@ Loot_AAT()
 	else if (per == 7) { return "Recon Palse"; }
 	else if (per == 8) { return "EMP"; }
 	else if (per == 9) { return "Drained"; }
+	else if (per == 10) { return "<null>"; }
 }
 // Guns in this catogory are intended for Common Loot boxes
 // These guns include lowlevel launchers, pistols and shotguns.
 Loot_Common_gun()
 {
 	att = RandIntArrayNoDupe(3, 0, 17);
-	gun = RandomIntRange(0,19);
+	gun = RandomIntRange(0,20);
 	if (gun >= 9) { str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]]; }
 	else { str = level.WeaponArray[gun]; }
 	return str;
@@ -357,7 +383,7 @@ Loot_Common_gun()
 Loot_Uncommon_gun()
 {
 	att = RandIntArrayNoDupe(3, 0, 21);
-	gun = RandomIntRange(10, 43);
+	gun = RandomIntRange(11, 44);
 	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
 	return str;
 }
@@ -366,7 +392,7 @@ Loot_Uncommon_gun()
 Loot_Rare_gun()
 {
 	att = RandIntArrayNoDupe(3, 0, 21);
-	gun = RandomIntRange(19,45);
+	gun = RandomIntRange(20,46);
 	if (gun < 43) { str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]]; }
 	else { str = level.WeaponArray[gun]; }
 	return str;
@@ -374,14 +400,27 @@ Loot_Rare_gun()
 Loot_Warrior_First()
 {
 	att = RandIntArrayNoDupe(3, 0, 19);
-	gun = RandomIntRange(19,39);
+	gun = RandomIntRange(20,40);
 	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
 	return str;
 }
 Loot_Scout_First()
 {
 	att = RandIntArrayNoDupe(3, 10, 21);
-	gun = RandomIntRange(39,43);
+	gun = RandomIntRange(40,44);
 	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
 	return str;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
