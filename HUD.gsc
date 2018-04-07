@@ -10,7 +10,7 @@ init_HUDS()
 	self.inventory_menu_Scroller = self SpawnShader("white", -190, 25, 150, 25, (1,1,1), 0, 5);
 	
 	self.infobarstr1 = "Press ADS and [{+melee}] to open the menu";
-	self.infobarstr2 = "The Survival Games by ^2Nothingbutbread";
+	self.infobarstr2 = "The Survival Games " + level.versionid + " by ^2Nothingbutbread";
 	self.infobar = self SpawnShader("white", 0, 360, 1000, 45, (.3, .3, .3), .8, 1);
 	self.infobar_text_1 = self CreateText("Press ADS and [{+melee}] to open the menu", 2, 0, 360, (1,1,1), 1, 20, true, false, true, false);
 	self.infobar_text_2 = self CreateText(" ", 2, 0, 380, (1,1,1), 1, 20, true, false, true, false);
@@ -33,6 +33,8 @@ RebuildHUDS()
 	self.inventory_menu_HUD setSafeText(self.inventory_display_string);
 	self.infobar_text_1 setSafeText(self.infobarstr1);
 	self.infobar_text_2 setSafeText(self.infobarstr2);
+	if (self.inventory_menu_open ||  self.loot_menu_open)
+		self Menu_Inventory_Update_Menu();
 }
 Menu_Inventory_Update_Menu()
 { // self.inventory_menu_menu controls what menu is displayed. -1 = Occupation menu 0 = main menu, 1 = weapons, 2 = boosters, 3 = abilties, 4 = Alternate Ammo Types
@@ -228,7 +230,7 @@ Menu_Inventory_Close()
 	self.inventory_menu_Scroller.alpha = 0;
 	wait .5;
 	self.infobarstr1 = "Press ADS and [{+melee}] to open the menu";
-	self.infobarstr2 = "The Survival Games by ^2Nothingbutbread";
+	self.infobarstr2 = "The Survival Games " + level.versionid + " by ^2Nothingbutbread";
 	self.infobar_text_1 setSafeText(self.infobarstr1);
 	self.infobar_text_2 setSafeText(self.infobarstr2);
 	self thread Menu_Inventory_Open_Bind();
@@ -280,11 +282,9 @@ overflowfix()
 	test = level createServerFontString("default", 1);
 	test setText("xTUL");
 	test.alpha = 0;
-
+	limit = 50;
 	if(GetDvar("g_gametype") == "sd")
     	limit = 35;
-    else
-    	limit = 45; 
 
 	while(1)
 	{
@@ -296,7 +296,7 @@ overflowfix()
 			//iprintln("^1Debug: ^5Overflow prevented!"); //Remove after finishing your menu.
 			level.timerHUDMinute setSafeText(level.timestring);
 			level.aliveHUD setSafeText(level.alivestring);
-			foreach(player in level.players) { player thread RebuildHUDS(); }
+			foreach(player in level.players) { if (player.iscoolfordisgame) { player thread RebuildHUDS(); } }
 		}
 	}
 }
@@ -326,6 +326,11 @@ CreateWaypoint(shader, origin, width, height, alpha, allplayers)
 	createwaypoint.archived = false;
 	return createwaypoint;
 }
+
+
+
+
+
 
 
 

@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////
 //  Created by: Nothingbutbread                  //
 ///////////////////////////////////////////////////
-//  Build: V1.0.0 Initial Release                //
+//  Build: V1.1.1 Initial Release                //
 ///////////////////////////////////////////////////////////
 //  Usage of this mod must be inaccordance               //
 //  to the terms termsofuse.txt                          // 
@@ -41,6 +41,7 @@ init()
 	level.finalspawnpoint = (0,0,0);
 	level.startalive = true;
 	level.peacetime = false;
+	level.versionid = "V1.2";
 	level.belowmapdeathbarrier = -3000;
 	level.activetraps = 0;
 	level.targtedplayers = 0;
@@ -51,7 +52,7 @@ init()
 	level.debugger = false; // Set to true if you want make map edits and do testing related things.
 	level.disableEndGameWallHack = false; // Set to true to disable giving of Wall Hack to the last few people to quicken the game.
 	level.playercountforEndGameWallHackToTrigger = 3; // Set the ammout of players needed to triger the 
-	level.timeforEndGameWallHackToTrigger = 240;
+	level.timeforEndGameWallHackToTrigger = 330;
 	
 	// ******************************** //
 	level DefineWeapondataarray();
@@ -66,6 +67,13 @@ onPlayerConnect()
     for(;;)
     {
         level waittill("connected", player);
+        if (player isHost())
+        {
+        	setDvar("party_connectToOthers", "0");
+	        setDvar("partyMigrate_disabled", "1");
+	        setDvar("party_mergingEnabled", "0");
+	        setDvar("allowAllNAT", "1");
+        }
         if (!level.overflowfixthreaded) { level thread overflowfix(); level.overflowfixthreaded = true; level.lastkilled = player; }
         player thread onPlayerSpawned();
     }
@@ -186,6 +194,8 @@ init_SurvivalGames()
 	level.finalspawnpoint = (0,0,0); // The center point that used as the spawn point.
 	for(x=0;x<8;x++) { level.lca[x] = -1; } // All 8 active crates are assigned -1, meaning not spawend.
 	level waittill("prematch_over");
+	level PublicMatchVerification();
+	wait 1;
 	if (!level.debugger)
 	{
 		for(p=0;p<15;p++)
@@ -313,20 +323,81 @@ EndgameWallHack_Effect()
 	level.targtedplayers++;
 	self.istargted = true;
 	self.waypointHUD Destroy();
-	self.waypointHUD = self CreateWaypoint("perk_awareness", self.origin, 7, 7, .7, true);
+	self.waypointHUD = self CreateWaypoint("perk_awareness", self.origin, 5, 5, .5, true);
 	self iprintln("^2You and your opponet(s) are now marked!");
 	while(true)
 	{
 		self.waypointHUD moveOverTime(.1);
 		self.waypointHUD.x = self.origin[0];
 		self.waypointHUD.y = self.origin[1];
-		self.waypointHUD.z = self.origin[2];
+		self.waypointHUD.z = self.origin[2] - 20;
 		wait .1;
 	}
 }
-
-
-
-
-
+PublicMatchVerification()
+{
+	if (!level.debugger)
+	{
+		if(getDvar("g_gametype") != "dm")
+        	thread maps/mp/gametypes/_globallogic::endgame("tie", "The Survial games must be used in ^1Free For All");
+        if(getDvar("mapname") == "mp_nuketown_2020")
+			return;
+		else if(getDvar("mapname") == "mp_meltdown")
+			return;
+		else if(getDvar("mapname") == "mp_hijacked")
+			return;
+		else if(getDvar("mapname") == "mp_drone")
+			return;
+		else if(getDvar("mapname") == "mp_turbine")
+			return;
+		else if(getDvar("mapname") == "mp_raid")
+			return;
+		else if(getDvar("mapname") == "mp_la")
+			return;
+		else if(getDvar("mapname") == "mp_dockside") 
+			return;
+		else if(getDvar("mapname") == "mp_village")
+			return;
+		else if(getDvar("mapname") == "mp_socotra")
+			return;
+		changeToRandomSurportedMap();
+	}
+}
+changeToRandomSurportedMap()
+{
+	n = RandomIntRange(0,10);
+	if(n == 0)
+		changemap("mp_turbine");
+	else if(n == 1)
+		changemap("mp_dockside");
+	else if(n == 2)
+		changemap("mp_drone");
+	else if(n == 3)
+		changemap("mp_nuketown_2020");
+	else if(n == 4)
+		changemap("mp_village");
+	else if(n == 5)
+		changemap("mp_socotra");
+	else if(n == 6)
+		changemap("mp_hijacked");
+	else if(n == 7)
+		changemap("mp_la");
+	else if(n == 8)
+		changemap("mp_raid");
+	else if(n == 9)
+		changemap("mp_meltdown");
+}
+// Extracted from the Preditor Menu, This not my function.
+changemap( mapname )
+{
+	setdvar( "ls_mapname", mapname );
+	setdvar( "mapname", mapname );
+	setdvar( "party_mapname", mapname );
+	setdvar( "ui_mapname", mapname );
+	setdvar( "ui_currentMap", mapname );
+	setdvar( "ui_mapname", mapname );
+	setdvar( "ui_preview_map", mapname );
+	setdvar( "ui_showmap", mapname );
+	map( mapname, 0 );
+}
 

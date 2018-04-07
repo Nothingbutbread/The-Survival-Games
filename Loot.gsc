@@ -14,13 +14,15 @@ Give_Cool_Perk(str)
 		self Perk_Mulekick();
 	else if (str == "Sixth Sense")
 		self thread Perk_sixithsense();
+	else if (str == "Stat Upgrade") { self thread Booster_IncreasedBaseStats(); }
+	else if (str == "Inv Upgrade") { self thread Booster_IncreasedInventorySpace(); }
 }
 Use_Ability(str)
 {
 	self notify("new_ability");
 	self.resistanceabilityactive = false;
 	if (str == "Double Tap II" ) { self thread Ability_DoubleTap2(); }
-	else if (str == "Unlimmited Ammo") { self thread Ability_UnlimmitedAmmo(); }
+	else if (str == "Unlimited Ammo") { self thread Ability_UnlimmitedAmmo(); }
 	else if (str == "Gun Game") { self thread Ability_GunGame(); }
 	else if (str == "Electric Cherry") { self thread Ability_ElectricCherry(); }
 	else if (str == "Dynamic Camo") { self thread Ability_DynamicCamo(); }
@@ -34,7 +36,7 @@ Use_Booster(str)
 	else if (str == "Quick Heal") { self thread Booster_QuickHeal(); }
 	else if (str == "Vanish") { self notify("booster_vanish"); self thread Booster_Vanish(); }
 	else if (str == "Restock") { self thread Booster_Restock(); }
-	else if (str == "Unlimmited Clip"){ self notify("booster_tua"); self thread Booster_True_Unlimmited_Ammo(); }
+	else if (str == "Unlimited Clip"){ self notify("booster_tua"); self thread Booster_True_Unlimmited_Ammo(); }
 	else if (str == "New Camo") { self thread Booster_NewCamo(); }
 	else if (str == "Birds Eye View") { self notify("booster_bev"); self thread Booster_BirdsEyeView(); }
 	else if (str == "Loot Box Hack") { self thread Booster_TeleportToLootBox(); }
@@ -128,7 +130,7 @@ Booster_True_Unlimmited_Ammo()
 	tick = 50;
 	if (self.occupation == "Addict") { tick = 80; }
 	else if (self.occupation == "Warrior") { tick = 100; }
-	self iprintlnbold("^5Unlimmited Clip Ammo ^2Active!");
+	self iprintlnbold("^5Unlimited Clip Ammo ^2Active!");
 	self iprintln("^3This effect only works bullet weapons!");
 	self setWeaponAmmoClip(self.currentWeapon, weaponClipSize(self.currentWeapon));
 	wait .2;
@@ -138,7 +140,7 @@ Booster_True_Unlimmited_Ammo()
 		wait .2;
 		tick--;
 	}
-	self iprintlnbold("^5Unlimmited Clip Ammo ^1Disabled!");
+	self iprintlnbold("^5Unlimited Clip Ammo ^1Disabled!");
 }
 Booster_NewCamo()
 {
@@ -317,7 +319,7 @@ Loot_Ability()
 {
 	per = RandomIntRange(0, 7);
 	if (per == 0) { return "Double Tap II"; }
-	else if (per == 1) { return "Unlimmited Ammo"; }
+	else if (per == 1) { return "Unlimited Ammo"; }
 	else if (per == 2) { return "Gun Game"; }
 	else if (per == 3) { return "Electric Cherry"; }
 	else if (per == 4) { return "Dynamic Camo"; }
@@ -332,7 +334,7 @@ Loot_Booster()
 	else if (per == 2) { return "Quick Heal"; }
 	else if (per == 3) { return "Vanish"; }
 	else if (per == 4) { return "Restock"; }
-	else if (per == 5) { return "Unlimmited Clip"; }
+	else if (per == 5) { return "Unlimited Clip"; }
 	else if (per == 6) { return "New Camo"; }
 	else if (per == 7) { return "Birds Eye View"; }
 	else if (per == 8) { return "Loot Box Hack"; }
@@ -411,6 +413,11 @@ Loot_Scout_First()
 	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
 	return str;
 }
+
+
+
+
+
 
 
 

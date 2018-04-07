@@ -14,7 +14,7 @@ Fun_Taunt()
 }
 Fun_Taunt_Text()
 {
-	t = RandomIntRange(0,58);
+	t = RandomIntRange(0,77);
 	if (t == 0) { return "it's time to die assholes!"; }
 	else if (t == 1) { return "I like the sound your corpse makes when I shoot it!"; }
 	else if (t == 2) { return "I will fuck yo moma harder than she did your face!"; }
@@ -73,7 +73,26 @@ Fun_Taunt_Text()
 	else if (t == 55) { return "No kid, I'm not using aimbot you just suck!"; }
 	else if (t == 56) { return "Time to push your buttons!\n^7[{+usereload}] [{+gostand}] [{+actionslot 1}] [{+actionslot 2}] [{+actionslot 3}] [{+actionslot 4}]"; }
 	else if (t == 57) { return "Press [{+actionslot 1}] for free dick in yo face!"; }
-
+	else if (t == 58) { return "Bitch please!"; }
+	else if (t == 59) { return "This lobby is full of incest kids!"; }
+	else if (t == 60) { return "Damn kids, lay off the sour cream!"; }
+	else if (t == 61) { return "Have you guys see " + level.lastkilled.name + "'s face? It'd kill ya!"; }
+	else if (t == 62) { return "My speling is like your skilz, non exisnt!"; }
+	else if (t == 63) { return "Hey guys, I love chipmonks!"; }
+	else if (t == 64) { return "I ^1F^2U^3C^1K^2E^3D ^5Y^4O ^1M^2O^3M^4!"; }
+	else if (t == 65) { return "Wow, just wow, wow wow!"; }
+	else if (t == 66) { return "I like spongbob!"; }
+	else if (t == 67) { return "tried to swim in lava."; }
+	else if (t == 68) { return "I'm going to drop you all like I did you skilz!"; }
+	else if (t == 69) { return "The ammout of new taunts is over 9000!"; }
+	else if (t == 70) { return "This is a generic taunt at id 70."; }
+	else if (t == 71) { return "Let me add a few 0's the end of my paycheck!"; }
+	else if (t == 72) { return "Now now little kids I've got candy. Come here with your hands up!"; }
+	else if (t == 73) { return "Host, please send trained players next time, these are are fucking joke!"; }
+	else if (t == 74) { return "Host, give me my aimbot so I can pwn these nOObs in style!"; }
+	else if (t == 75) { return "Aimbot [*] | Skill [*] | You're Fucked [*]!"; }
+	else if (t == 76) { return "I get laid all day unlike you!"; }
+	
 }
 // A is the attacker
 // v in the victem
@@ -94,6 +113,11 @@ Fun_taunt_trap(a, v)
 	else if (t == 11) { return a.name + ": hey " + v.name + " your brains are missing!"; }
 	else if (t == 12) { return a.name + ": hey " + v.name + " you're dead again!"; }
 }
+
+
+
+
+
 
 
 

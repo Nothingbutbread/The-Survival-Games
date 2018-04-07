@@ -249,7 +249,7 @@ Menu_Loot_Close()
 	self.loot_menu_Scroller.alpha = 0;
 	wait .5;
 	self.infobarstr1 = "Press ADS and [{+melee}] to open the menu";
-	self.infobarstr2 = "The Survival Games by ^2Nothingbutbread";
+	self.infobarstr2 = "The Survival Games " + level.versionid + " by ^2Nothingbutbread";
 	self.infobar_text_1 setSafeText(self.infobarstr1);
 	self.infobar_text_2 setSafeText(self.infobarstr2);
 	self.loot_menu_open = false;
@@ -295,7 +295,22 @@ Menu_Loot_Controls()
 		{
 			if (self.loot_menu_pos == 6) { self Menu_Loot_Close(); return; }
 			else { self Menu_Loot_Claim(self.loot_menu_pos); self.lootboxitemcount--; self Menu_Loot_Update_Menu(); }
-			if (self.lootboxitemcount < 1) { self Menu_Loot_Close(); return; }
+			if (self.lootboxitemcount < 2) 
+			{
+				// Patch V1.1, Added code checks for any remaining items in the loot box.
+				// If any are found, Close Loot menu is aborted.
+				for(i = 0; i < 7; i++) 
+				{ 
+					if (isDefined(self.loot[i])) 
+					{ 
+						if (self.loot[i] != "") 
+						{ 
+							break; 
+						} 
+					}
+					if (i == 6)  { self Menu_Loot_Close(); return; }
+				}
+			}
 			self Menu_Inventory_Info_Bar_Update_Mapping();
 			wait .1;
 		}
@@ -368,16 +383,18 @@ Generate_DEBUG_Loot()
 {
 	luck = RandomIntRange(0,100);
 	retval = "";
-	/*
 	if (luck < 25) { retval = Loot_Uncommon_gun(); } // 25% chance of a gun
 	else if (luck < 35) { retval = Loot_Booster(); } // 10% chance of a booster
 	else if (luck < 50) { retval = Loot_Perk(); }  // 15% chance of a perk
 	else if (luck < 75) { retval = Loot_AAT(); } // 25% chance of a AAT
 	else { retval = Loot_Ability(); } // 25% chance for an ability
-	*/
-	retval = Loot_Booster();
 	return retval;
 }
+
+
+
+
+
 
 
 
