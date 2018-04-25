@@ -146,7 +146,8 @@ whatisthatobject(str)
 	else if ("Resistance" == str) { return 9; } 
 	else if ("Mule Kick" == str) { return 9; }
 	else if ("Sixth Sense" == str) { return 9; }
-	else { return 1; } // A weapon
+	else if (str.size == 6 || str.size == 7){ if (DisplayStringMod(str, 4) == "[SP]") { return 8; } }
+	return 1; // A weapon
 }
 // Takes a size value and two intergers for the range.
 // Returns an array of values that fall in the range and are unique.
@@ -284,6 +285,7 @@ UnstuckPlayer()
 		self setorigin(self.spawnorigin);
 		self iprintln("^1This the only time you can use unstuck this game!");
 		self iprintln("^1Next time will result in death");
+		self iprintln("^2Killing other players will reset this!");
 	}
 	else { self suicide(); iprintln("^3" + self.name + " ^7used unstuck too many times!\n^1Consider reading the infobar!"); }
 }
@@ -329,6 +331,11 @@ Menu_Inventory_Info_Bar_Update_Mapping()
 			self.infobarstr1 = "^3Specialist^7: ^5Double ammo for AAT's with 2+ ammo. The next loot box you open will have an AAT.";
 			self.infobarstr2 = "^73 kill streak gives 25 extra health and 20 percent extra speed. Increased chance for AAT's in Loot boxes.";
 		}
+		else if (self.inventory_menu_pos == 7)
+		{
+			self.infobarstr1 = "^3Secret Shopper^7: ^5Start with 5 SP. Double SP on kill, More SP from Loot boxes.";
+			self.infobarstr2 = "^73 kill streak gives 50 SP, additional kills afterward award 10 SP.";
+		}
 	}
 	else if (self.inventory_menu_menu == 0 && !self.loot_menu_open)
 	{
@@ -345,6 +352,8 @@ Menu_Inventory_Info_Bar_Update_Mapping()
 		else if (self.inventory_menu_pos == 5)
 		{ self.infobarstr1 = "^3Utility Menu^7: ^5Opens a menu with utility options such as Unstuck and developer only commands."; }
 		else if (self.inventory_menu_pos == 6)
+		{ self.infobarstr1 = "^3Shop Menu^7: ^5Opens a menu where you can spend Survivor Points [SP] for varrious things."; }
+		else if (self.inventory_menu_pos == 7)
 		{ self.infobarstr1 = "^3Exit Menu^7: ^5Closes the menu."; }
 
 	}
@@ -352,14 +361,14 @@ Menu_Inventory_Info_Bar_Update_Mapping()
 	{
 		if (isDefined(self.invgun[self.inventory_menu_pos]) && self.invgun[self.inventory_menu_pos] != "")
 		{ self.infobarstr1 = "Swaps held gun with " + DisplayStringMod(self.invgun[self.inventory_menu_pos], 25); }
-		else if (self.inventory_menu_pos == 6)
+		else if (self.inventory_menu_pos == 7)
 		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
 		else
 		{ self.infobarstr1 = "^1Empty gun slot! You can't do anything with that right now"; }
 	}
 	else if (self.inventory_menu_menu == 2 && !self.loot_menu_open)
 	{
-		if (!isDefined(self.invboo[self.inventory_menu_pos]) || self.inventory_menu_pos == 6)
+		if (!isDefined(self.invboo[self.inventory_menu_pos]) || self.inventory_menu_pos == 7)
 		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
 		else
 		{
@@ -391,7 +400,7 @@ Menu_Inventory_Info_Bar_Update_Mapping()
 	}
 	else if (self.inventory_menu_menu == 3 && !self.loot_menu_open)
 	{
-		if (!isDefined(self.invabi[self.inventory_menu_pos]) || self.inventory_menu_pos == 6)
+		if (!isDefined(self.invabi[self.inventory_menu_pos]) || self.inventory_menu_pos == 7)
 		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
 		else
 		{
@@ -415,7 +424,7 @@ Menu_Inventory_Info_Bar_Update_Mapping()
 	}
 	else if (self.inventory_menu_menu == 4 && !self.loot_menu_open)
 	{
-		if (!isDefined(self.invaat[self.inventory_menu_pos]) || self.inventory_menu_pos == 6)
+		if (!isDefined(self.invaat[self.inventory_menu_pos]) || self.inventory_menu_pos == 7)
 		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
 		else
 		{
@@ -463,6 +472,27 @@ Menu_Inventory_Info_Bar_Update_Mapping()
 		{ self.infobarstr1 = "^3Uncommon Loot Box^7: ^5Closes this menu and gives you a Uncommon Loot Box."; }
 		else if (self.inventory_menu_pos == 6)
 		{ self.infobarstr1 = "^3Rare Loot Box^7: ^5Closes this menu and gives you a Rare Loot Box."; }
+		else if (self.inventory_menu_pos == 7)
+		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
+	}
+	else if (self.inventory_menu_menu == 8 && !self.loot_menu_open)
+	{
+		if (self.inventory_menu_pos == 0)
+		{ self.infobarstr1 = "^3Buy Common Loot Box^7: ^5Cost: ^13^7SP ^7Closes this menu and gives you a Common Loot Box."; }
+		else if (self.inventory_menu_pos == 1)
+		{ self.infobarstr1 = "^3Buy Uncommon Loot Box^7: ^5Cost: ^19^7SP ^7Closes this menu and gives you a Uncommon Loot Box."; }
+		else if (self.inventory_menu_pos == 2)
+		{ self.infobarstr1 = "^3Buy Rare Loot Box^7: ^5Cost: ^120^7SP ^7Closes this menu and gives you a Rare Loot Box."; }
+		else if (self.inventory_menu_pos == 3)
+		{ self.infobarstr1 = "^3Buy Random Gun^7: ^5Cost: ^13^7SP ^7Adds a random gun to your weapons inventory"; }
+		else if (self.inventory_menu_pos == 4)
+		{ self.infobarstr1 = "^3Buy Random Booster^7: ^5Cost: ^15^7SP ^7Adds a random booster to your boosters inventory"; }
+		else if (self.inventory_menu_pos == 5)
+		{ self.infobarstr1 = "^3Buy Random AAT^7: ^5Cost: ^17^7SP ^7Adds a random AAT to your AATs inventory"; }
+		else if (self.inventory_menu_pos == 6)
+		{ self.infobarstr1 = "^3Buy Random Ability^7: ^5Cost: ^110^7SP ^7Adds a random ability to your abilities inventory"; }
+		else if (self.inventory_menu_pos == 7)
+		{ self.infobarstr1 = "^3Back^7: ^5Closes this menu, goes back to the main menu."; }
 	}
 	else if (self.loot_menu_open)
 	{
@@ -473,10 +503,11 @@ Menu_Inventory_Info_Bar_Update_Mapping()
 			if (self.loot[self.loot_menu_pos] != "") 
 			{
 				in = whatisthatobject(self.loot[self.loot_menu_pos]);
-				if (in == 1) { self.infobarstr1 = "^3Weapon^7: " + DisplayStringMod(self.loot[self.loot_menu_pos], 16); }
+				if (in == 1) { self.infobarstr1 = "^3Weapon^7: " + DisplayStringMod(self.loot[self.loot_menu_pos], 14); }
 				else if (in == 2) { self.infobarstr1 = "^3Booster^7: " + self.loot[self.loot_menu_pos]; }
 				else if (in == 3) { self.infobarstr1 = "^3Ability^7: " + self.loot[self.loot_menu_pos]; }
 				else if (in == 4) { self.infobarstr1 = "^3[AAT] Alternate Ammo Type^7: " + self.loot[self.loot_menu_pos]; }
+				else if (in == 8) { self.infobarstr1 = "^3Survivor Points^7: ^2" + DisplayStringModAlt(self.loot[self.loot_menu_pos], 5) + " ^7Survival Points (used instantly)"; }
 				else if (in == 9) { self.infobarstr1 = "^3Perk^7: " + self.loot[self.loot_menu_pos] + " (used instantly)"; }
 				else { self.infobarstr1 = "^1Empty loot slot: ^3Nothing to see here!"; }
 			}
@@ -487,20 +518,14 @@ Menu_Inventory_Info_Bar_Update_Mapping()
 	self.infobar_text_1 setSafeText(self.infobarstr1);
 	self.infobar_text_2 setSafeText(self.infobarstr2);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+DisplayStringModAlt(str, offset)
+{
+	s = "";
+	if (offset < str.size)
+	{
+		for(x=offset;x<str.size;x++) { s += str[x]; }
+	}
+	else { s = string; }
+	return s;
+}
 

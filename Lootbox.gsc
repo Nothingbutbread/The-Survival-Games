@@ -1,7 +1,7 @@
 giveSupplyDrop()
 {
 	self.loot = [];
-	for(x=0;x<6;x++) { self.loot[x] = ""; }
+	for(x=0;x<7;x++) { self.loot[x] = ""; }
 	luck = RandomIntRange(0,100);
 	teir = 1;
 	if (self.occupation == "Bookie" && !self.occupation_bonus)
@@ -32,14 +32,16 @@ Generate_Common_Loot()
 	if (self.occupation == "Specialist")
 	{
 		if (luck < 50){ retval = Loot_Common_gun(); } // 50% chance of gun
-		else if (luck < 75) { retval = Loot_Booster(); } // 25% chance of Booster
-		else if (luck < 85) { retval = Loot_Perk(); } // 10% chance of a perk
+		else if (luck < 70) { retval = Loot_Booster(); } // 20% chance of Booster
+		else if (luck < 80) { retval = Loot_Perk(); } // 10% chance of a perk
+		else if (luck < 85) { retval = Loot_SP_Common(); } // 5% of some SP
 		else { retval = Loot_AAT(); } // 15% chance for an AAT
 	}
 	else if (self.occupation == "Warrior")
 	{
 		if (luck < 65){ retval = Loot_Common_gun(); } // 65% chance of gun
-		else if (luck < 80) { retval = Loot_Booster(); } // 15% chance of Booster
+		else if (luck < 75) { retval = Loot_Booster(); } // 10% chance of Booster
+		else if (luck < 80) { retval = Loot_SP_Common(); } // 5% of some SP
 		else if (luck < 90) { retval = Loot_Perk(); } // 10% chance of a perk
 		else { retval = Loot_AAT(); } // 10% chance for an AAT
 	}
@@ -51,11 +53,20 @@ Generate_Common_Loot()
 		else if (luck < 90) { retval = Loot_AAT(); } // 5% chance of a AAT
 		else { retval = Loot_Ability(); } // 10% chance for an ability
 	}
+	else if (self.occipation == "Secret Shopper")
+	{
+		if (luck < 50){ retval = Loot_Common_gun(); } // 50% chance of gun
+		else if (luck < 75) { retval = Loot_Booster(); } // 25% chance of Booster
+		else if (luck < 85) { retval = Loot_Perk(); } // 10% chance of a perk
+		else if (luck < 95) { retval = Loot_SP_Common(); } // 10% chance at some SP
+		else { retval = Loot_AAT(); } // 5% chance for an AAT
+	}
 	else
 	{
-		if (luck < 60){ retval = Loot_Common_gun(); } // 60% chance of gun
-		else if (luck < 85) { retval = Loot_Booster(); } // 25% chance of Booster
-		else if (luck < 95) { retval = Loot_Perk(); } // 10% chance of a perk
+		if (luck < 55){ retval = Loot_Common_gun(); } // 55% chance of gun
+		else if (luck < 80) { retval = Loot_Booster(); } // 25% chance of Booster
+		else if (luck < 90) { retval = Loot_Perk(); } // 10% chance of a perk
+		else if (luck < 95) { retval = Loot_SP_Common(); } // 5% of some SP
 		else { retval = Loot_AAT(); } // 5% chance for an AAT
 	}
 	return retval;
@@ -66,18 +77,20 @@ Generate_Uncommon_Loot()
 	retval = "";
 	if (self.occupation == "Specialist")
 	{
-		if (luck < 35) { retval = Loot_Uncommon_gun(); } // 35% chance of a gun
-		else if (luck < 55) { retval = Loot_Booster(); } // 20% chance of a booster
-		else if (luck < 65) { retval = Loot_Perk(); }  // 10% chance of a perk
+		if (luck < 30) { retval = Loot_Uncommon_gun(); } // 30% chance of a gun
+		else if (luck < 45) { retval = Loot_Booster(); } // 15% chance of a booster
+		else if (luck < 55) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else if (luck < 65) { retval = Loot_SP_Uncommon(); } // 10% chance at some SP
 		else if (luck < 90) { retval = Loot_AAT(); } // 25% chance of a AAT
 		else { retval = Loot_Ability(); } // 10% chance for an ability
 	}
 	else if (self.occupation == "Warrior")
 	{
 		if (luck < 45) { retval = Loot_Uncommon_gun(); } // 45% chance of a gun
-		else if (luck < 65) { retval = Loot_Booster(); } // 20% chance of a booster
-		else if (luck < 75) { retval = Loot_Perk(); }  // 10% chance of a perk
-		else if (luck < 90) { retval = Loot_AAT(); } // 15% chance of a AAT
+		else if (luck < 55) { retval = Loot_Booster(); } // 10% chance of a booster
+		else if (luck < 65) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else if (luck < 80) { retval = Loot_AAT(); } // 15% chance of a AAT
+		else if (luck < 90) { retval = Loot_SP_Uncommon(); } // 10% chance at some SP
 		else { retval = Loot_Ability(); } // 10% chance for an ability
 	}
 	else if (self.occupation == "Addict")
@@ -85,14 +98,25 @@ Generate_Uncommon_Loot()
 		if (luck < 30) { retval = Loot_Uncommon_gun(); } // 30% chance of a gun
 		else if (luck < 60) { retval = Loot_Booster(); } // 30% chance of a booster
 		else if (luck < 70) { retval = Loot_Perk(); }  // 10% chance of a perk
-		else if (luck < 85) { retval = Loot_AAT(); } // 15% chance of a AAT
+		else if (luck < 80) { retval = Loot_AAT(); } // 10% chance of a AAT
+		else if (luck < 85) { retval = Loot_SP_Uncommon(); } // 5% chance at some SP
 		else { retval = Loot_Ability(); } // 15% chance for an ability
+	}
+	else if (self.occipation == "Secret Shopper")
+	{
+		if (luck < 30) { retval = Loot_Uncommon_gun(); } // 30% chance of a gun
+		else if (luck < 50) { retval = Loot_Booster(); } // 20% chance of a booster
+		else if (luck < 65) { retval = Loot_SP_Uncommon(); } // 15% chance at some SP
+		else if (luck < 80) { retval = Loot_AAT(); } // 15% chance of a AAT
+		else if (luck < 90) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else { retval = Loot_Ability(); } // 10% chance for an ability
 	}
 	else
 	{
 		if (luck < 35) { retval = Loot_Uncommon_gun(); } // 35% chance of a gun
 		else if (luck < 60) { retval = Loot_Booster(); } // 25% chance of a booster
-		else if (luck < 75) { retval = Loot_Perk(); }  // 15% chance of a perk
+		else if (luck < 70) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else if (luck < 75) { retval = Loot_SP_Uncommon(); } // 5% chance at some SP
 		else if (luck < 90) { retval = Loot_AAT(); } // 15% chance of a AAT
 		else { retval = Loot_Ability(); } // 10% chance for an ability
 	}
@@ -105,33 +129,45 @@ Generate_Rare_Loot()
 	if (self.occupation == "Specialist")
 	{
 		if (luck < 20) { retval = Loot_Rare_gun(); } // 20% chance of a gun
-		else if (luck < 30) { retval = Loot_Booster(); } // 10% chance of a booster
-		else if (luck < 40) { retval = Loot_Perk(); }  // 10% chance of a perk
-		else if (luck < 75) { retval = Loot_AAT(); } // 35% chance of a AAT
+		else if (luck < 25) { retval = Loot_Booster(); } // 5% chance of a booster
+		else if (luck < 30) { retval = Loot_Perk(); }  // 5% chance of a perk
+		else if (luck < 65) { retval = Loot_AAT(); } // 35% chance of a AAT
+		else if (luck < 75) { retval = Loot_SP_Rare(); } // 10% chance at some SP
 		else { retval = Loot_Ability(); } // 25% chance for an ability
 	}
 	else if (self.occupation == "Warrior")
 	{
 		if (luck < 35) { retval = Loot_Rare_gun(); } // 35% chance of a gun
-		else if (luck < 40) { retval = Loot_Booster(); } // 5% chance of a booster
-		else if (luck < 50) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else if (luck < 40) { retval = Loot_Perk(); } // 5% chance of a perk
+		else if (luck < 50) { retval = Loot_SP_Rare(); } // 10% chance at some SP
 		else if (luck < 70) { retval = Loot_AAT(); } // 20% chance of a AAT
 		else { retval = Loot_Ability(); } // 30% chance for an ability
 	}
 	else if (self.occupation == "Addict")
 	{
-		if (luck < 20) { retval = Loot_Rare_gun(); } // 20% chance of a gun
-		else if (luck < 40) { retval = Loot_Booster(); } // 20% chance of a booster
-		else if (luck < 50) { retval = Loot_Perk(); }  // 10% chance of a perk
-		else if (luck < 65) { retval = Loot_AAT(); } // 15% chance of a AAT
+		if (luck < 15) { retval = Loot_Rare_gun(); } // 15% chance of a gun
+		else if (luck < 35) { retval = Loot_Booster(); } // 20% chance of a booster
+		else if (luck < 45) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else if (luck < 55) { retval = Loot_AAT(); } // 10% chance of a AAT
+		else if (luck < 65) { retval = Loot_SP_Rare(); } // 10% chance at some SP
 		else { retval = Loot_Ability(); } // 35% chance for an ability
+	}
+	else if (self.occipation == "Secret Shopper")
+	{
+		if (luck < 20) { retval = Loot_Uncommon_gun(); } // 20% chance of a gun
+		else if (luck < 40) { retval = Loot_Booster(); } // 20% chance of a booster
+		else if (luck < 60) { retval = Loot_SP_Rare(); } // 20% chance at some SP
+		else if (luck < 75) { retval = Loot_AAT(); } // 15% chance of a AAT
+		else if (luck < 90) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else { retval = Loot_Ability(); } // 15% chance for an ability
 	}
 	else
 	{
 		if (luck < 25) { retval = Loot_Rare_gun(); } // 25% chance of a gun
 		else if (luck < 35) { retval = Loot_Booster(); } // 10% chance of a booster
-		else if (luck < 50) { retval = Loot_Perk(); }  // 15% chance of a perk
-		else if (luck < 75) { retval = Loot_AAT(); } // 25% chance of a AAT
+		else if (luck < 45) { retval = Loot_Perk(); }  // 10% chance of a perk
+		else if (luck < 65) { retval = Loot_AAT(); } // 20% chance of a AAT
+		else if (luck < 75) { retval = Loot_SP_Rare(); } // 10% chance at some SP
 		else { retval = Loot_Ability(); } // 25% chance for an ability
 	}
 	return retval;
@@ -198,22 +234,22 @@ LB_Uncommon()
 }
 LB_Rare()
 {
-	if (self.occupation != "Bookie") { items = RandomIntRange(3,7); }
-	else { items = RandomIntRange(4,7); }
+	if (self.occupation != "Bookie") { items = RandomIntRange(3,8); }
+	else { items = RandomIntRange(4,8); }
 	for(x=0;x<items;x++) { self.loot[x] = self thread Generate_Rare_Loot(); }
-	if (self.occupation == "Warrior" && self.occupation_bonus && items < 6)
+	if (self.occupation == "Warrior" && self.occupation_bonus && items < 7)
 	{
 		self.occupation_bonus = false;
 		self.loot[items] = Loot_Warrior_First();
 		items++;
 	}
-	if (self.occupation == "Scout" && self.occupation_bonus && items < 6)
+	if (self.occupation == "Scout" && self.occupation_bonus && items < 7)
 	{
 		self.occupation_bonus = false;
 		self.loot[items] = Loot_Scout_First();
 		items++;
 	}
-	if (self.occupation == "Specialist" && self.occupation_bonus && items < 6)
+	if (self.occupation == "Specialist" && self.occupation_bonus && items < 7)
 	{
 		self.occupation_bonus = false;
 		self.loot[items] = Loot_AAT();
@@ -259,6 +295,7 @@ Menu_Loot_Claim(index)
 	if (self.loot[index] == "") { return; }
 	type = whatisthatobject(self.loot[index]);
 	if (type == 9) { self Give_Cool_Perk(self.loot[index]); }
+	else if (type == 8) { self Claim_SP_From_Loot_Box(self.loot[index]); }
 	else  { self add_Thing_To_Inventory(type, self.loot[index], true); }
 	self.loot[index] = "";
 }
@@ -277,7 +314,7 @@ Menu_Loot_Controls()
 			self Menu_Inventory_Info_Bar_Update_Mapping();
 			wait .05;
 		}
-		else if (self actionslottwobuttonpressed()  && self.loot_menu_pos < 6)
+		else if (self actionslottwobuttonpressed()  && self.loot_menu_pos < 7)
 		{
 			self.loot_menu_Scroller moveOverTime(.05);
 			self.loot_menu_Scroller.y += 24;
@@ -293,13 +330,13 @@ Menu_Loot_Controls()
 		}
 		else if (self usebuttonpressed())
 		{
-			if (self.loot_menu_pos == 6) { self Menu_Loot_Close(); return; }
+			if (self.loot_menu_pos == 7) { self Menu_Loot_Close(); return; }
 			else { self Menu_Loot_Claim(self.loot_menu_pos); self.lootboxitemcount--; self Menu_Loot_Update_Menu(); }
 			if (self.lootboxitemcount < 2) 
 			{
 				// Patch V1.1, Added code checks for any remaining items in the loot box.
 				// If any are found, Close Loot menu is aborted.
-				for(i = 0; i < 7; i++) 
+				for(i = 0; i < 8; i++) 
 				{ 
 					if (isDefined(self.loot[i])) 
 					{ 
@@ -308,7 +345,7 @@ Menu_Loot_Controls()
 							break; 
 						} 
 					}
-					if (i == 6)  { self Menu_Loot_Close(); return; }
+					if (i == 7)  { self Menu_Loot_Close(); return; }
 				}
 			}
 			self Menu_Inventory_Info_Bar_Update_Mapping();
@@ -320,7 +357,7 @@ Menu_Loot_Controls()
 Menu_Loot_Update_Menu()
 { 
 	str = self.lootboxrarity;
-	for(x=0;x<6;x++)
+	for(x=0;x<7;x++)
 	{
 		luck = RandomIntRange(0,2);
 		if (self.loot[x] != "") 
@@ -370,8 +407,7 @@ isTheTrapQueueEmpty(i)
 }
 LB_DEBUG()
 {
-	items = 6;
-	for(x=0;x<items;x++) { self.loot[x] = self thread Generate_DEBUG_Loot(); }
+	for(x=0;x<7;x++) { self.loot[x] = self thread Generate_DEBUG_Loot(); }
 	self.lootboxrarity = "Debugger";
 	self.lootboxitemcount = items;
 	self.inventory_menu_BG.color = (0,0,1);
@@ -388,24 +424,24 @@ Generate_DEBUG_Loot()
 	else if (luck < 50) { retval = Loot_Perk(); }  // 15% chance of a perk
 	else if (luck < 75) { retval = Loot_AAT(); } // 25% chance of a AAT
 	else { retval = Loot_Ability(); } // 25% chance for an ability
+	retval = Loot_SP_Rare();
 	return retval;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Claim_SP_From_Loot_Box(str)
+{
+	// Format: '[SP] <num>'
+	num = 0;
+	if (str.size < 6) { self iprintlnbold("Code Error: Tried to claim SP from an invalid string!"); return; }
+	for(x = 5; x < str.size; x++)
+	{
+		num *= 10;
+		if (str[x] == "0" || str[x] == "1" || str[x] == "2" || str[x] == "3" || str[x] == "4" || str[x] == "5" || str[x] == "6" || str[x] == "7" || str[x] == "8" || str[x] == "9")
+		{
+			num += int(str[x]);
+		}
+		else { break; } // Not a number
+	}
+	self.sp += num;
+	self iprintln("Claimed " + num + " survivor points!");
+}
 

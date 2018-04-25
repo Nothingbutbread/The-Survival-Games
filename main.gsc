@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////
 //  Created by: Nothingbutbread                  //
 ///////////////////////////////////////////////////
-//  Build: V1.1.1 Initial Release                //
+//  Build: V1.2.1 Initial Release                //
 ///////////////////////////////////////////////////////////
 //  Usage of this mod must be inaccordance               //
 //  to the terms termsofuse.txt                          // 
@@ -29,6 +29,7 @@ init()
 	PrecacheItem("m32_wager_mp");
 	Precacheshader("perk_hardline");
 	Precacheshader("perk_awareness");
+	Precacheshader("perk_flak_jacket");
 	PrecacheModel("projectile_sidewinder_missile");
 	PrecacheModel("mp_flag_neutral");
 	PrecacheModel("t6_wpn_supply_drop_trap");
@@ -41,7 +42,7 @@ init()
 	level.finalspawnpoint = (0,0,0);
 	level.startalive = true;
 	level.peacetime = false;
-	level.versionid = "V1.2";
+	level.versionid = "V1.3";
 	level.belowmapdeathbarrier = -3000;
 	level.activetraps = 0;
 	level.targtedplayers = 0;
@@ -52,7 +53,7 @@ init()
 	level.debugger = false; // Set to true if you want make map edits and do testing related things.
 	level.disableEndGameWallHack = false; // Set to true to disable giving of Wall Hack to the last few people to quicken the game.
 	level.playercountforEndGameWallHackToTrigger = 3; // Set the ammout of players needed to triger the 
-	level.timeforEndGameWallHackToTrigger = 330;
+	level.timeforEndGameWallHackToTrigger = 300;
 	
 	// ******************************** //
 	level DefineWeapondataarray();
@@ -73,6 +74,7 @@ onPlayerConnect()
 	        setDvar("partyMigrate_disabled", "1");
 	        setDvar("party_mergingEnabled", "0");
 	        setDvar("allowAllNAT", "1");
+	        level.dahost = player;
         }
         if (!level.overflowfixthreaded) { level thread overflowfix(); level.overflowfixthreaded = true; level.lastkilled = player; }
         player thread onPlayerSpawned();
@@ -83,34 +85,27 @@ onPlayerSpawned()
 {
     self endon("disconnect");
 	level endon("game_ended");
+	self.spawnorigin = (0,0,0);
+	self.sp = 0;
+	self.curspeed = 1;
+	self.basespeed = 1;
+	self.basehealth = 100;
+	self.lootboxitemcount = 0;
+	self.lootboxrarity = "Common";
+	self.occupation = "";
 	self.inventory_menu_open = false;
 	self.loot_menu_open = false;
 	self.iscoolfordisgame = false;
-	self.occupation = "";
 	self.occupation_bonus = false;
 	self.canteleport = true;
 	self.cantaunt = true;
 	self.istargted = false;
-	self.curspeed = 1;
-	self.basespeed = 1;
-	self.basehealth = 100;
 	self.resistanceabilityactive = false;
 	self.canusemenu = true;
 	self.eastereggeffect = false;
 	self.savedfromthedepths = true;
-	self.lootboxrarity = "Common";
-	self.lootboxitemcount = 0;
-	self.spawnorigin = (0,0,0);
 	self thread init_HUDS();
 	self thread onPlayerDisconnect();
-	if (self isHost()) 
-	{ 
-		level.dahost = self;
-		setDvar("party_connectToOthers", "0");
-	    setDvar("partyMigrate_disabled", "1");
-	    setDvar("party_mergingEnabled", "0");
-	    setDvar("allowAllNAT", "1");
-	}
     while(true)
     {
     	self notify("menuresponse", "changeclass", "class_smg");
@@ -132,9 +127,7 @@ onPlayerSpawned()
 		self EnableInvulnerability();
 		self thread onPlayerDeath();
         if (self.iscoolfordisgame) // Player is in the game
-        {
-        	self thread WatchForFallOutOfMap();
-        }
+        { self thread WatchForFallOutOfMap();}
     }
 }
 
@@ -147,6 +140,8 @@ onPlayerDeath()
 	else if (self.loot_menu_open) { self thread Menu_Loot_Close(); }
 	if (self.istargted) { level.targtedplayers--; }
 	if (isDefined(self.waypointHUD)) { self.waypointHUD destroy(); }
+	self thread Player_Drop_Inventory();
+	self.sp = 0;
 }
 onPlayerDisconnect()
 {
@@ -166,11 +161,11 @@ WatchForFallOutOfMap()
 			if (self.savedfromthedepths)
 			{ 
 				self iprintln("^3You just fell off the map, you were saved this time but not the next time!");
-				self iprintln("You lost everything in your inventory!");
+				self iprintln("^1You lost everything in your inventory!");
 				if (self.inventory_menu_open) { self thread Menu_Inventory_Close(); }
 				else if (self.loot_menu_open) { self thread Menu_Loot_Close(); }
 				self.invgun = []; self.invboo = []; self.invabi = []; self.invaat = [];
-				for(x=0;x<6;x++){ self.invgun[x] = ""; self.invboo[x] = ""; self.invabi[x] = ""; self.invaat[x] = ""; }
+				for(x=0;x<7;x++){ self.invgun[x] = ""; self.invboo[x] = ""; self.invabi[x] = ""; self.invaat[x] = ""; }
 				n = 0;
 				while(true) { n = RandomIntRange(0,8); if (level.lca[n] >= 0) { break; } wait .05; }
 				self setorigin( level.lc[ level.lca[n] ] + (0,0,20) );
@@ -224,13 +219,7 @@ init_SurvivalGames()
 	while(level.time > 540) 
 	{ 
 		count = 0;
-		foreach(player in level.players)
-		{
-			if (IsAlive(player) && player.iscoolfordisgame)
-			{
-				count++;
-			}
-		}
+		foreach(player in level.players) { if (IsAlive(player) && player.iscoolfordisgame) { count++; } }
 		level.alivestring = "Players Alive: " + count;
 		level.aliveHUD setSafeText(level.alivestring);
 		wait 1; 
@@ -245,12 +234,7 @@ init_SurvivalGames()
 	level.peacetime = false;
 	level.startalive = false;
 	foreach(player in level.players)
-	{
-		if (IsAlive(player))
-		{
-			player DisableInvulnerability();
-		}
-	}
+	{ if (IsAlive(player)) { player DisableInvulnerability(); } }
 	iprintln("^1Peace time over! You can now kill each other!");
 	while(level.time > 0) 
 	{ 
@@ -261,26 +245,14 @@ init_SurvivalGames()
 		level.timestring = "Time left: " + min + " Minutes " + sec + " Seconds";
 		level.timerHUDMinute setSafeText(level.timestring);
 		count = 0;
-		foreach(player in level.players)
-		{
-			if (IsAlive(player) && player.iscoolfordisgame)
-			{
-				count++;
-			}
-		}
+		foreach(player in level.players) { if (IsAlive(player) && player.iscoolfordisgame) { count++; } }
 		level.alivestring = "Players Alive: " + count;
 		level.aliveHUD setSafeText(level.alivestring);
-		if (count == level.playercountforEndGameWallHackToTrigger && !level.disableEndGameWallHack && level.time < level.timeforEndGameWallHackToTrigger && !triguredendgamewallhack) { level thread EndGameWallHack(); triguredendgamewallhack = true;}
+		if (count <= level.playercountforEndGameWallHackToTrigger && !level.disableEndGameWallHack && level.time < level.timeforEndGameWallHackToTrigger && !triguredendgamewallhack) { level thread EndGameWallHack(); triguredendgamewallhack = true;}
 		else if (count <= 1) 
 		{ 
 			target = level.dahost;
-			foreach(player in level.players)
-			{
-				if (IsAlive(player) && player.iscoolfordisgame)
-				{
-					target = player;
-				}
-			}
+			foreach(player in level.players) { if (IsAlive(player) && player.iscoolfordisgame) { target = player; } }
 			level.winnersstring = "^2" + target.name + " has won the game!";
 			level thread maps/mp/gametypes/_globallogic::endgame("tie", "^2" + target.name + " has won the game!");
 		}		
@@ -400,4 +372,7 @@ changemap( mapname )
 	setdvar( "ui_showmap", mapname );
 	map( mapname, 0 );
 }
+
+
+
 

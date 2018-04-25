@@ -591,7 +591,7 @@ Standoff()
 	ACL((8683,12526,305));
 	ACL((8477,17431,2537));
 	ACL((9540,10507,295));
-	ACL((16234,5538,25));
+	//ACL((16234,5538,25));
 	ACL((413,-4508,10));
 	ACL((7647,2239,45));
 	ACL((6709,4835,80));
@@ -612,6 +612,7 @@ Standoff()
 	level thread Forge_Teleport((-1137,867,0), (-1488,888,0));
 	level thread Forge_Teleport((817,1976,10), (803,2205,3));
 	level thread Forge_Teleport((1537,-316,0), (1916,-357,42));
+	level thread SetDistanceCap(20300);
 }
 
 Plaza()
@@ -749,6 +750,9 @@ Detour()
 
 Uplink()
 { }
+
+
+
 
 
 

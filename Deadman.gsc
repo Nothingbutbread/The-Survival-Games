@@ -96,7 +96,7 @@ getOrigin()
 GiveCommonLootBox()
 {
 	self.loot = [];
-	for(x=0;x<6;x++) { self.loot[x] = ""; }
+	for(x=0;x<7;x++) { self.loot[x] = ""; }
 	self Menu_Inventory_Close();
 	self.inventory_menu_menu = 0;
 	wait .1;
@@ -105,7 +105,7 @@ GiveCommonLootBox()
 GiveUncommonLootBox()
 {
 	self.loot = [];
-	for(x=0;x<6;x++) { self.loot[x] = ""; }
+	for(x=0;x<7;x++) { self.loot[x] = ""; }
 	self Menu_Inventory_Close();
 	self.inventory_menu_menu = 0;
 	wait .1;
@@ -114,12 +114,15 @@ GiveUncommonLootBox()
 GiveRareLootBox()
 {
 	self.loot = [];
-	for(x=0;x<6;x++) { self.loot[x] = ""; }
+	for(x=0;x76;x++) { self.loot[x] = ""; }
 	self Menu_Inventory_Close();
 	self.inventory_menu_menu = 0;
 	wait .1;
 	self thread LB_Rare();
 }
+
+
+
 
 
 

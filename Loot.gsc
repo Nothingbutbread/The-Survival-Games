@@ -187,7 +187,7 @@ Booster_IncreasedBaseStats()
 Booster_IncreasedInventorySpace()
 {
 	n = [];
-	for(x=0;x<4;x++) { if (self.invlimmit[x] < 6) { n[n.size] = x; } }
+	for(x=0;x<4;x++) { if (self.invlimmit[x] < 7) { n[n.size] = x; } }
 	if (n.size == 0) { self iprintln("Your inventory space was already at max.\nThe hearty booster effect was trigerd instead");  self notify("booster_hearty"); self thread Booster_Hearty(); }
 	else
 	{
@@ -199,7 +199,7 @@ Booster_IncreasedInventorySpace()
 		}
 		else
 		{
-			if (self.invlimmit[r] < 6) 
+			if (self.invlimmit[r] < 7) 
 			{ 
 				self.invlimmit[r]++;
 				self printInventoryType(r);
@@ -207,7 +207,7 @@ Booster_IncreasedInventorySpace()
 			else
 			{
 				i = self GetExpandableInventoryIndex(r);
-				if (i < 6) 
+				if (i < 7) 
 				{
 					self.invlimmit[i]++;
 					self printInventoryType(i); 
@@ -413,21 +413,35 @@ Loot_Scout_First()
 	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
 	return str;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Loot_SP_Common()
+{
+	cash = 0;
+	if (self.occipation == "Secret Shopper")
+	{ cash = RandomIntRange(2,4); }
+	else { cash = RandomIntRange(1,3); }
+	return "[SP] " + cash;
+}
+Loot_SP_Uncommon()
+{
+	cash = 0;
+	if (self.occipation == "Secret Shopper")
+	{ cash = RandomIntRange(4,10); }
+	else { cash = RandomIntRange(3,9); }
+	return "[SP] " + cash;
+}
+Loot_SP_Rare()
+{
+	cash = 0;
+	if (self.occipation == "Secret Shopper")
+	{ cash = RandomIntRange(8,21); }
+	else { cash = RandomIntRange(6,19); }
+	return "[SP] " + cash;
+}
+Loot_Purchased_gun()
+{
+	att = RandIntArrayNoDupe(3, 0, 21);
+	gun = RandomIntRange(0, 44);
+	str = level.WeaponArray[gun] + "+"+ level.AttachmentArray[att[0]] + "+" + level.AttachmentArray[att[1]] + "+" + level.AttachmentArray[att[2]];
+	return str;
+}
 

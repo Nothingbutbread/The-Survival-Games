@@ -11,6 +11,57 @@ spawnEntity(model, origin, angle)
     return entity;
 }
 ACL(origin)  { level.lc[level.lc.size] = origin; } // Add Create Location
+Player_Drop_Inventory()
+{
+	self endon("disconnect");
+	o = self.origin;
+	array1 = self.invgun;
+	array2 = self.invboo;
+	array3 = self.invabi;
+	array4 = self.invaat;
+	sp = self.sp;
+	level thread Player_Spawn_InventoryLootCrate(o, self.name, sp, array1, array2, array3, array4);
+}
+Player_Spawn_InventoryLootCrate(location, placer, sp, array1, array2, array3, array4) // Inventory of dead player.
+{
+	level endon("game_ended");
+	killloop = false;
+	obj = spawnEntity("t6_wpn_supply_drop_trap",location, (0,0,90));
+	marker = CreateWaypoint("perk_flak_jacket", location + (0,0,50) , 5, 5, .7, true);
+	tick = 0;
+	while(tick < 600) // 1 minute max durration of the inventory being there.
+	{
+		foreach(player in level.players)
+		{
+			if (Distance(player.origin, location) < 60)
+			{
+				if (player meleebuttonpressed())
+				{
+					player iprintln("^2Collected " + placer + "'s Inventory!");
+					player.sp += sp;
+					for(x=0;x < 7; x++)
+					{ 
+						if (isDefined(array1[x]) && array1[x] != "") { player add_Thing_To_Inventory(0, array1[x], true); }
+						if (isDefined(array2[x]) && array2[x] != "") { player add_Thing_To_Inventory(1, array2[x], true); }
+						if (isDefined(array3[x]) && array3[x] != "") { player add_Thing_To_Inventory(2, array3[x], true); }
+						if (isDefined(array4[x]) && array4[x] != "") { player add_Thing_To_Inventory(3, array4[x], true); }
+					}
+					killloop = true;
+					break;
+				}
+			}
+		}
+		if (killloop) { break; }
+		tick++;
+		wait .1;
+	}
+	//
+	marker Destroy();
+	obj delete();
+}
+CollectPlayerInventory()
+{
+}
 Spawn_LootCrate(index, location) // Generic loot crate. Contents generated are players based on thier varribles.
 {
 	level endon("game_ended");
@@ -77,9 +128,48 @@ SetOrigin_fixed(origin)
 	wait 1;
 	self.canteleport = true;
 }
-
+SetDistanceCap(radius, point)
+{
+	level endon("game_ended");
+	if (!isDefined(point)) { point = level.finalspawnpoint; }
+	if (level.debugger){
+		while(true){
+			foreach(player in level.players){
+				if (Distance(player.origin, point) > radius){
+					player iprintlnbold("Out of range! Distance: " + int(Distance(player.origin, point)));
+				}
+			}
+			wait 1;
+		}
+	}
+	else {
+		level waittill("prematch_over");
+		wait 30;
+		foreach(player in level.players){
+			player thread Client_DistanceChecker(radius, point);
+		}
+	}
+}
+Client_DistanceChecker(radius, point)
+{
+	self endon("death");
+	self endon("disconnect");
+	level endon("game_ended");
+	while(true){
+		if (Distance(self.origin, point) > radius){
+			self playlocalsound("mpl_wager_humiliate");
+			self iprintlnbold("^1You are too far from the map!");
+			t = int(self.health / 3);
+			self iprintln("Health lost: ^1" + t);
+			if (t < 10) { t = 10; }
+			self DoDamage(t , self.origin, self, self, "none", "MOD_BURNED", 0, "supplydrop_mp");
+		}
+		wait 1;
+	}
+}
 BlackListedZone(cor1,cor2)
 {
+	level endon("game_ended");
 	if (cor1[0] > cor2[0])
 	{
 		low0 = cor2[0];
@@ -137,6 +227,9 @@ BlackListedZone(cor1,cor2)
 		}
 	}
 }
+
+
+
 
 
 
